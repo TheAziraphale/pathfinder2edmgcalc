@@ -1,0 +1,92 @@
+.wrapper {
+    margin: 20px;
+    width: 400px;
+}
+
+.innerWrapper {
+    padding: 10px;
+    padding: 10px;
+}
+
+.classWrapper {
+    width: 400px;
+}
+
+.graphContainer {
+    height: 360px;
+    width: 840px;
+    margin: 20px;
+    pointer-events: none;
+}
+
+.labelName {
+    display: inline;
+}
+
+.inputNumber {
+    width: 45px;
+}
+
+.inputNumberSmall {
+    width: 42px;
+}
+
+.labelContainer {
+    flex-direction: row;
+    width: 200px;
+}
+
+.inputContainer {
+    display: flex;
+    flex-direction: 'row';
+    margin-top: 5px;
+}
+
+.buttonCheckboxWrapper{
+    display: flex;
+    flex-direction: row;
+}
+
+#toggle:checked ~ .control-me::after {
+    content: "😩";
+}
+
+label {
+    background: #e7e9e7;
+    border-color: rgb(65, 64, 64);
+    border-width: 1px;
+    border-style: solid;
+    padding: 0.1rem 0.2rem;
+    border-radius: 0.2rem;
+    font-size: 12px;
+    margin-left: 3px;
+    font-weight: 600;
+}
+
+.labelChecked {
+    background: #3ce63c;
+}
+
+.visually-hidden {
+    position: absolute;
+    left: -100vw;
+    /* Note, you may want to position the checkbox over top the label and set the opacity to zero instead. It can be better for accessibilty on some touch devices for discoverability. */
+}
+
+.noselect {
+  -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+     -khtml-user-select: none; /* Konqueror HTML */
+       -moz-user-select: none; /* Old versions of Firefox */
+        -ms-user-select: none; /* Internet Explorer/Edge */
+            user-select: none; /* Non-prefixed version, currently
+                                  supported by Chrome, Edge, Opera and Firefox */
+}
+
+.exclamationImage {
+    margin-left: 5px;
+}
+
+.classInfoWrapper {
+    margin-left: 10px;
+}
