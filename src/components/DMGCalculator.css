@@ -13,10 +13,32 @@
 }
 
 .graphContainer {
-    height: 360px;
+    height: 370px;
     width: 840px;
     margin: 20px;
     pointer-events: none;
+}
+
+.rowChildren {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    margin-right: 5px;
+    margin-left: 25px;
+    margin-top: -15px;
+    margin-bottom: 0px;
+}
+
+.acText {
+    font-size: 10px;
+    font-style: italic;
+}
+
+.acLabel {
+    position: absolute;
+    font-size: 10px;
+    margin-left: 3px;
+    margin-top: -5px;
 }
 
 .labelName {

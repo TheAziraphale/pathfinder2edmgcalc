@@ -11,6 +11,7 @@ import {
 */
 import './DMGCalculator.css';
 import { Line } from "react-chartjs-2";
+import EnemyAC from '../jsons/EnemyAC.json';
 
 interface Props {
     data?: any[]
@@ -23,6 +24,12 @@ const DMGGraph = (props: Props) => {
                  '11', '12', '13', '14', '15', '16', '17', '18', '19', '20'],
         datasets: data,
       };
+    
+      /*
+    for (let i = 0; i < 20; i++) {
+        styledData.labels[i] += ' (' + EnemyAC['ac'][i+1] + ')'
+    }
+    */
 
     return (
         <div className={'graphContainer'}>
@@ -39,6 +46,15 @@ const DMGGraph = (props: Props) => {
                     <LineSeries color={'yellow'} valueField="fourth_value" argumentField="fourth" />
                 </Chart>
                 */}
+                <p className={'acLabel'} key={'ac'}>{'AC:'}</p>
+                <div className={'rowChildren'}>
+                {EnemyAC['ac'].map((ac, index) => {
+                    if(ac === 0) {
+                        return '';
+                    }
+                    return(<p className={'acText'} key={ac + '_' + index}>{ac}</p>)
+                })}
+                </div>
             </Paper>
         </div>
     );

@@ -56,35 +56,28 @@ const DMGCalculator = (props: Props) => {
     const [rage, setRage] = useState(false);
     const [deviseAStratagem, setDeviseAStratagem] = useState(false);
     const [lastAttackWithFinisher, setLastAttackWithFinisher] = useState(false);
+    const [applyPlusHitRunes, setApplyPlusHitRunes] = useState(true);
+    const [applyStrikingRunes, setApplyStrikingRunes] = useState(true);
+
+    useEffect(() => {
+        setApplySneakDmg(classChoice === 'rogue');
+        setApplyPanache(classChoice === 'swashbuckler');
+        setLastAttackWithFinisher(classChoice === 'rogue');
+        setMarkedTarget(classChoice === 'ranger');
+        setRage(classChoice === 'barbarian');
+        setDeviseAStratagem(classChoice === 'investigator');
+        setIntStat('18');
+
+        if ((classChoice !== 'barbarian' && classChoice !== 'ranger')) {
+            setClassSpec('-');
+        }
+    }, [classChoice])
 
     useEffect(() => {
         if(classChoice === '-') {
             setGraphData([]);
         } else {
             setGraphData(getDamageChart());
-        }
-        if(classChoice !== 'rogue' && applySneakDmg) {
-            setApplySneakDmg(false);
-        }
-        if (classChoice !== 'swashbuckler' && applyPanache) {
-            setApplySneakDmg(false);
-            setLastAttackWithFinisher(false);
-        }
-        if (classChoice !== 'ranger' && markedTarget) {
-            setMarkedTarget(false);
-        }
-        if (classChoice !== 'barbarian' && rage) {
-            setRage(false);
-        }
-        
-        if (classChoice !== 'investigator' && intStat !== '18') {
-            setIntStat('18');
-        }
-        if (classChoice !== 'investigator' && deviseAStratagem) {
-            setDeviseAStratagem(false);
-        }
-        if ((classChoice !== 'barbarian' && classChoice !== 'ranger') && classSpec !== '-') {
-            setClassSpec('-');
         }
         // eslint-disable-next-line
     }, [
@@ -112,7 +105,9 @@ const DMGCalculator = (props: Props) => {
         twin,
         rage,
         markedTarget,
-        deviseAStratagem
+        deviseAStratagem,
+        applyPlusHitRunes,
+        applyStrikingRunes
     ])
 
     const getClassJson = useCallback(() => {
@@ -195,7 +190,7 @@ const DMGCalculator = (props: Props) => {
     }
 
     const getAvgDmg = (crit:boolean, level:number, lastAttack?: boolean, attack?: number) => {
-        const numberOfDice = Bonuses['EnchantingBonuses'].striking[level] + 1;
+        const numberOfDice = applyStrikingRunes ? Bonuses['EnchantingBonuses'].striking[level] + 1 : 1;
         let dmgFromAbility = getAbilityBonus(level, 'Dmg');
 
         if (ranged) {
@@ -230,7 +225,7 @@ const DMGCalculator = (props: Props) => {
 
         if (backstabber) {
             bonusDmg ++;
-            if (Bonuses['EnchantingBonuses'].hitBonus[level] >= 3) {
+            if (applyPlusHitRunes && Bonuses['EnchantingBonuses'].hitBonus[level] >= 3) {
                 bonusDmg++;
             }
         }
@@ -345,7 +340,7 @@ const DMGCalculator = (props: Props) => {
             if ((attack === 1 && classChoice === 'investigator') && deviseAStratagem) {
                 abilityBonus = getAbilityBonus(level, 'Hit', parseInt(intStat));
             }
-            const enchantmentHitBonus = Bonuses['EnchantingBonuses'].hitBonus[level];
+            const enchantmentHitBonus = applyPlusHitRunes ? Bonuses['EnchantingBonuses'].hitBonus[level] : 0;
 
             return classHitBonus + enchantmentHitBonus + abilityBonus + level;
         }
@@ -363,7 +358,7 @@ const DMGCalculator = (props: Props) => {
             <Paper className={'innerWrapper'}>
                 <div style={{backgroundColor: color, width: 80, height: 15}} />
                 <NumberInput min={0} max={10} value={amountOfAttacks} setValue={setAmountOfAttacks} label={'Number of attacks:'} />
-                <NumberInput min={-20} max={20} value={amountOfExtraAc} setValue={setAmountOfExtraAc} label={'Enemy AC mod:'} />
+                <NumberInput min={-20} max={20} value={amountOfExtraAc} setValue={setAmountOfExtraAc} label={'Enemy AC bonus mod:'} />
                 <ClassChoice name={'Class:'} setClassChoice={(val: string) => { 
                     setClassChoice(val);
                     console.log(val);
@@ -386,7 +381,7 @@ const DMGCalculator = (props: Props) => {
                     { classChoice === 'investigator' && 
                         <div>
                             <NumberInput min={8} max={18} value={intStat} setValue={setIntStat} label={'Int ability score (at lvl 1):'} /> 
-                            <CheckboxInput value={deviseAStratagem} setValue={setDeviseAStratagem} label={"Devise a Stragagem:"} />
+                            <CheckboxInput value={deviseAStratagem} setValue={setDeviseAStratagem} label={"Devise a Stragagem (once):"} />
                         </div>
                     }
                     {classChoice === 'swashbuckler' && 
@@ -458,6 +453,8 @@ const DMGCalculator = (props: Props) => {
                     </div>
                 }
                 <NumberInput min={2} max={20} value={critRange} setValue={setCritRange} label={'Natural crit:'} />
+                <CheckboxInput value={applyPlusHitRunes} setValue={setApplyPlusHitRunes} label={"Plus runes (+1, +2, +3):"} />
+                <CheckboxInput value={applyStrikingRunes} setValue={setApplyStrikingRunes} label={"Striking runes:"} />
             </Paper>
         </div>
     );
