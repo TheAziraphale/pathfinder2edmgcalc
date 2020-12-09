@@ -1,0 +1,70 @@
+.pcWrapper {
+    margin: 20px;
+    width: 400px;
+}
+
+.innerPCWrapper {
+    padding: 10px;
+    padding-top: 5px;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.label {
+    margin: 0px;
+}
+
+.quarterElement {
+    width: 90px;
+    height: 60px;
+}
+
+.twoFifthElement {
+    width: 105px;
+    height: 60px;
+}
+
+.oneThirdElement {
+    width: 125px;
+    height: 60px;
+}
+
+.twoThirdElement {
+    width: 220px;
+    height: 60px;
+}
+
+.halfElement {
+    width: 180px;
+    height: 56px;
+}
+
+.fullElement {
+    width: 390px;
+    height: 56px;
+}
+
+.elementContainer {
+    width: 390px;
+    height: 56px;
+    display: flex;
+    flex-wrap: wrap;
+    margin-top: -2px;
+}
+.labelElement {
+    margin: 0px;
+}
+.labelHeader {
+    margin: 0px;
+    margin-top: 5px;
+    font-size: 16px;
+    font-weight: 500;
+}
+.elementWrapper {
+    border-style: solid;
+    border-color: rgb(56, 56, 56);
+    border-width: 1px;
+    border-radius: 5px;
+    padding: 5px;
+    width: 370px;
+}

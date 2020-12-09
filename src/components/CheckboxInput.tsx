@@ -4,7 +4,7 @@ import './DMGCalculator.css';
 interface Props {
     value: boolean;
     setValue:(value:boolean) => void
-    label: string;
+    label?: string;
 }
 
 const CheckboxInput = (props: Props) => {
@@ -12,9 +12,11 @@ const CheckboxInput = (props: Props) => {
 
     return (
         <div className={'inputContainer'}>
-            <div className={'labelContainer'}>
-            <p className={'labelName'}>{label}</p>
-            </div>
+            {label !== undefined && (
+                <div className={'labelContainer'}>
+                    <p className={'labelName'}>{label}</p>
+                </div>
+            )}
             <input className={'inputNumber'} type={'checkbox'} checked={value} onChange={(event) => { 
                 setValue(event.target.checked)
             }} />

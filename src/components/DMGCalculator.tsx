@@ -50,14 +50,14 @@ const DMGCalculator = (props: Props) => {
     const [hitStat, setHitStat] = useState('18');
     const [dmgStat, setDmgStat] = useState('18');
     const [intStat, setIntStat] = useState('18');
+    const [applyPlusHitRunes, setApplyPlusHitRunes] = useState(true);
+    const [applyStrikingRunes, setApplyStrikingRunes] = useState(true);
     const [applySneakDmg, setApplySneakDmg] = useState(false);
     const [applyPanache, setApplyPanache] = useState(false);
     const [markedTarget, setMarkedTarget] = useState(false);
     const [rage, setRage] = useState(false);
     const [deviseAStratagem, setDeviseAStratagem] = useState(false);
     const [lastAttackWithFinisher, setLastAttackWithFinisher] = useState(false);
-    const [applyPlusHitRunes, setApplyPlusHitRunes] = useState(true);
-    const [applyStrikingRunes, setApplyStrikingRunes] = useState(true);
 
     useEffect(() => {
         setApplySneakDmg(classChoice === 'rogue');
@@ -361,7 +361,6 @@ const DMGCalculator = (props: Props) => {
                 <NumberInput min={-20} max={20} value={amountOfExtraAc} setValue={setAmountOfExtraAc} label={'Enemy AC bonus mod:'} />
                 <ClassChoice name={'Class:'} setClassChoice={(val: string) => { 
                     setClassChoice(val);
-                    console.log(val);
                     if (val === 'barbarian') {
                         setClassSpec("animal");
                     } else if (val === 'ranger') {

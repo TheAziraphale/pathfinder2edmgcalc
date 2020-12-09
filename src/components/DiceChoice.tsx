@@ -5,7 +5,7 @@ interface Props {
     startDiceValue?: string
     setDiceValue: (diceValue: string) => void;
     allowNoInput: boolean;
-    name: string;
+    name?: string;
 }
 
 const DiceChoice = (props: Props) => {
@@ -13,9 +13,11 @@ const DiceChoice = (props: Props) => {
 
     return (
         <div className={'inputContainer'}>
-            <div className={'labelContainer'}>
-            <p className={'labelName'}>{name}</p>
-            </div>
+            {name !== undefined && (
+                <div className={'labelContainer'}>
+                    <p className={'labelName'}>{name}</p>
+                </div>
+            )}
             D <select className={'inputNumberSmall'} defaultValue={startDiceValue} onChange={(event) => { 
                 setDiceValue(event.target.value)
             }}>

@@ -1,7 +1,8 @@
 import React, { useCallback, useState } from 'react';
-import DMGCalculator from './components/DMGCalculator'
+// import DMGCalculator from './components/DMGCalculator'
 import './App.css';
 import DMGGraph from './components/DMGGraph';
+import PCClass from './components/PCClass';
 
 const App = () => {
   const [graphData0, setGraphData0] = useState([{}]);
@@ -16,6 +17,8 @@ const App = () => {
   return (
     <div className={'classWrapper'}>
       <DMGGraph data={combinedArray()} />
+      {
+        /*
       <div className={'dmgCalcRow'}>
         <DMGCalculator setGraphData={(data:any[]) => {
           setGraphData0(data);
@@ -31,6 +34,24 @@ const App = () => {
         <DMGCalculator setGraphData={(data:any[]) => {
           setGraphData3(data);
         }} id={'3'} color={'yellow'} />
+      </div>
+        */
+      }
+      <div className={'dmgCalcRow'}>
+        <PCClass id={"0"} color={'blue'} setGraphData={(data:any[]) => {
+          setGraphData0(data);
+        }} />
+        <PCClass id={"1"} color={'red'} setGraphData={(data:any[]) => {
+          setGraphData1(data);
+        }} />
+      </div>
+      <div className={'dmgCalcRow'}>
+        <PCClass id={"2"} color={'green'} setGraphData={(data:any[]) => {
+          setGraphData2(data);
+        }} />
+        <PCClass id={"3"} color={'yellow'} setGraphData={(data:any[]) => {
+          setGraphData3(data);
+        }} />
       </div>
     </div>
   );

@@ -4,7 +4,7 @@ import './DMGCalculator.css';
 interface Props {
     value: string;
     setValue:(value:string) => void
-    label: string;
+    label?: string;
     min?: number;
     max?: number
 }
@@ -14,9 +14,11 @@ const NumberInput = (props: Props) => {
 
     return (
         <div className={'inputContainer'}>
-            <div className={'labelContainer'}>
-                <p className={'labelName'}>{label}</p>
-            </div>
+            {label !== undefined && (
+                <div className={'labelContainer'}>
+                    <p className={'labelName'}>{label}</p>
+                </div>
+            )}
             <input className={'inputNumber'}  type={'number'} min={min} max={max} value={value} onChange={(event) => { 
                 setValue(event.target.value)
             }} />

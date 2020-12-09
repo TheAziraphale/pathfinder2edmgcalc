@@ -3,13 +3,16 @@ import './DMGCalculator.css';
 
 interface Props {
     setClassChoice: (classChoice: string) => void;
-    name: string;
+    name?: string;
+    noLabel?: boolean;
 }
 
 interface SpecProps {
     setSpecChoice: (classChoice: string) => void;
     classId: string;
-    name: string;
+    name?: string;
+    noLabel?: boolean;
+    allowEmpty?: boolean;
 }
 
 interface ClassOption {
@@ -87,7 +90,7 @@ const rangerSpecs: ClassTypes = {
 }
 
 const ClassChoice = (props: Props) => {
-    const { name, setClassChoice } = props;
+    const { name, setClassChoice, noLabel } = props;
     const [currentClass, setCurrentClass] = useState<string>('-');
     const [hoverText, setHoverText] = useState<string>('');
 
@@ -118,9 +121,11 @@ const ClassChoice = (props: Props) => {
     
     return (
         <div className={'inputContainer'}>
-            <div className={'labelContainer'}>
-                <p className={'labelName'}>{name}</p>
-            </div>
+            {!noLabel && (
+                <div className={'labelContainer'}>
+                    <p className={'labelName'}>{name}</p>
+                </div>
+            )}
             <select onChange={(event) => { 
                 setClassChoice(event.target.value)
                 setCurrentClass(event.target.value);
@@ -139,16 +144,23 @@ const ClassChoice = (props: Props) => {
 }
 
 export const SpecChoice = (props: SpecProps) => {
-    const { name, setSpecChoice, classId } = props;
+    const { name, setSpecChoice, classId, noLabel, allowEmpty } = props;
     
     return (
         <div className={'inputContainer'}>
-            <div className={'labelContainer'}>
-                <p className={'labelName'}>{name}</p>
-            </div>
+            {!noLabel && (
+                <div className={'labelContainer'}>
+                    <p className={'labelName'}>{name}</p>
+                </div>
+            )}
             <select onChange={(event) => { 
                 setSpecChoice(event.target.value)
             }}>
+                {allowEmpty &&  
+                    <option key={"emptyState"} value={'-'}>
+                        { '-' }
+                    </option>
+                }
                 {classId === 'barbarian' && Object.keys(barbarianSpecs).map(key => (
                     <option key={key} value={key}>
                         { barbarianSpecs[key].name }
