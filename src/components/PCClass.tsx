@@ -3,7 +3,6 @@ import ClassChoice, { SpecChoice } from './ClassChoice';
 import { Paper } from '@material-ui/core';
 import './PCClass.css';
 import NumberInput from './NumberInput';
-import CheckboxInput from './CheckboxInput';
 import DiceChoice from './DiceChoice';
 import CheckboxButtonInput from './CheckboxButtonInput';
 import ClassChoices from '../jsons/ClassChoices.json';
@@ -21,6 +20,7 @@ interface Props {
     id: string;
     color: string;
     setGraphData: (data:any[]) => void;
+    enemyAcMod?: string;
 }
 
 const RangerPrecisionDiceSize = 8;
@@ -29,7 +29,7 @@ const SwashbucklerFinisherDmgDice = 6;
 const InvestigatorPrecisionDiceSize = 6;
 
 const PCClass = (props: Props) => {
-    const { id, color, setGraphData } = props;
+    const { id, color, setGraphData, enemyAcMod } = props;
     const [classChoice, setClassChoice] = useState<string>('-');
     const [classSpec, setClassSpec] = useState<string>('-');
     const [strength, setStrength] = useState<string>('18');
@@ -52,6 +52,7 @@ const PCClass = (props: Props) => {
     const [startAtMaxMAP, setStartAtMaxMAP] = useState(false);
     const [ignoreMAP, setIgnoreMAP] = useState(false);
     const [hitBonus, setHitBonus] = useState<string>('0');
+    const [dmgBonus, setDmgBonus] = useState<string>('0');
     const [applySneakDmg, setApplySneakDmg] = useState(false);
     const [applyPanache, setApplyPanache] = useState(false);
     const [markedTarget, setMarkedTarget] = useState(false);
@@ -59,7 +60,6 @@ const PCClass = (props: Props) => {
     const [deviseAStratagem, setDeviseAStratagem] = useState(false);
     const [lastAttackWithFinisher, setLastAttackWithFinisher] = useState(false);
     const [amountOfAttacks, setAmountOfAttacks] = useState('1');
-    const [amountOfExtraAc, setAmountOfExtraAc] = useState('0');
 
     const doesClassHaveASpec = useCallback(() => {
         if (classChoice === 'barbarian' || classChoice === 'ranger') {
@@ -70,8 +70,6 @@ const PCClass = (props: Props) => {
     }, [classChoice])
 
     useEffect(() => {
-        setClassSpec('-');
-
         setApplySneakDmg(classChoice === 'rogue');
         setApplyPanache(classChoice === 'swashbuckler');
         setLastAttackWithFinisher(false);
@@ -98,8 +96,8 @@ const PCClass = (props: Props) => {
         setStartAtMaxMAP(false);
         setIgnoreMAP(false);
         setHitBonus('0');
+        setDmgBonus('0');
         setAmountOfAttacks('1');
-        setAmountOfExtraAc('0');
     }, [classChoice]);
 
     useEffect(() => {
@@ -116,8 +114,7 @@ const PCClass = (props: Props) => {
         diceSize, 
         deadlyDiceSize, 
         fatalDiceSize, 
-        amountOfAttacks, 
-        amountOfExtraAc,
+        amountOfAttacks,
         critRange,
         startAtMaxMAP,
         ignoreMAP,
@@ -139,7 +136,9 @@ const PCClass = (props: Props) => {
         applyPlusHitRunes,
         applyStrikingRunes,
         weaponType,
-        hitBonus
+        hitBonus,
+        dmgBonus,
+        enemyAcMod
     ])
 
     const getClassJson = useCallback(() => {
@@ -202,9 +201,9 @@ const PCClass = (props: Props) => {
         let abilityStat = 0;  
 
         if (stat === 'Hit') {
-            abilityStat = overrideStat !== undefined ? overrideStat : (finesse && dexterity > strength) || weaponType === 'Ranged' ?  parseInt(dexterity) : parseInt(strength);
+            abilityStat = overrideStat !== undefined ? overrideStat : (finesse && parseInt(dexterity) > parseInt(strength)) || weaponType === 'Ranged' ?  parseInt(dexterity) : parseInt(strength);
         } else {
-            abilityStat = overrideStat !== undefined ? overrideStat : (finesse && canUseDexForDmg && dexterity > strength) ? parseInt(dexterity) : parseInt(strength);
+            abilityStat = overrideStat !== undefined ? overrideStat : (finesse && canUseDexForDmg && parseInt(dexterity) > parseInt(strength)) ? parseInt(dexterity) : parseInt(strength);
         }
 
         let increases = Bonuses['AbilityIncrease'].boost[level];
@@ -269,6 +268,8 @@ const PCClass = (props: Props) => {
                 bonusDmg += numberOfDice *2;
             }
         }
+
+        bonusDmg += parseInt(dmgBonus);
 
         const deadlyProgression = Bonuses['DeadlyProgression'].diceAmount[level];
 
@@ -382,7 +383,7 @@ const PCClass = (props: Props) => {
 
     const getEnemyAc = (level: number) => {
         const enemyAc = EnemyAC['ac'][level];
-        return enemyAc + parseInt(amountOfExtraAc);
+        return enemyAc + parseInt(enemyAcMod);
     };
 
     return (
@@ -396,12 +397,21 @@ const PCClass = (props: Props) => {
                     <div className={'elementContainer'}>
                         <div className={'halfElement'}>
                             <p className={'label'}>Choose your class</p>                
-                            <ClassChoice setClassChoice={setClassChoice} noLabel={true} />
+                            <ClassChoice setClassChoice={(val: string) => { 
+                                setClassChoice(val);
+                                if (val === 'barbarian') {
+                                    setClassSpec("animal");
+                                } else if (val === 'ranger') {
+                                    setClassSpec("flurry");
+                                } else {
+                                    setClassSpec('-');
+                                }
+                            }} noLabel={true} />
                         </div>
                         {classChoice !== '-' && doesClassHaveASpec() && (
                             <div className={'halfElement'}>
                                 <p className={'label'}>Choose your spec</p>                
-                                <SpecChoice allowEmpty={true} setSpecChoice={setClassSpec} classId={classChoice} noLabel={true} />
+                                <SpecChoice setSpecChoice={setClassSpec} classId={classChoice} noLabel={true} />
                             </div>
                         )}
                     </div>
@@ -540,14 +550,12 @@ const PCClass = (props: Props) => {
                                     </div>
                                 )}
                             </div>
-                            <div className={'elementContainer'}>
-                                <div className={'halfElement'}>
-                                    <p className={'label'}>Hit runes (+1, +2, +3)</p>   
-                                    <CheckboxInput value={applyPlusHitRunes} setValue={setApplyPlusHitRunes} />
+                            <div className={'elementContainer'} style={{height: 25}}>
+                                <div style={{marginRight: 5}}>
+                                    <CheckboxButtonInput value={applyPlusHitRunes} setValue={setApplyPlusHitRunes} label={'Hit runes (+1, +2, +3)'} id={'checkbox_hit_runes' + id} /> 
                                 </div>
-                                <div className={'halfElement'}>
-                                    <p className={'label'}>Striking runes</p>   
-                                    <CheckboxInput value={applyStrikingRunes} setValue={setApplyStrikingRunes} />
+                                <div>
+                                    <CheckboxButtonInput value={applyStrikingRunes} setValue={setApplyStrikingRunes} label={'Striking runes'} id={'checkbox_striking_runes' + id} /> 
                                 </div>
                             </div>
                         </div>
@@ -556,37 +564,36 @@ const PCClass = (props: Props) => {
                         </div>
                         <div className={'elementWrapper'}>
                             <div className={'elementContainer'}>
-                                <div className={'halfElement'} >
-                                    <p className={'label'}>Attacks in the round</p>                
+                                <div className={'oneThirdElement'} style={{width: 140}} >
+                                    <p className={'label'}>Number of attacks</p>                
                                     <NumberInput min={1} max={10} value={amountOfAttacks} setValue={setAmountOfAttacks} /> 
                                 </div>
                                 <div className={'twoFifthElement'}>
                                     <p className={'label'}>Bonus to hit</p>  
                                     <NumberInput min={-20} max={20} value={hitBonus} setValue={setHitBonus} /> 
                                  </div>
+                                <div className={'oneThirdElement'}>
+                                    <p className={'label'}>Bonus to damage</p>  
+                                    <NumberInput min={-20} max={20} value={dmgBonus} setValue={setDmgBonus} /> 
+                                 </div>
                             </div>
-                            <div className={'elementContainer'}>
-                                <div className={'twoFifthElement'}>
-                                    <p className={'label'}>Max MAP</p>  
-                                    <CheckboxInput value={startAtMaxMAP} setValue={(val:boolean) => {
+                            <div className={'elementContainer'} style={{height: 25}}>
+                                <div style={{marginRight: 5}}>
+                                <CheckboxButtonInput value={startAtMaxMAP} setValue={(val:boolean) => {
                                         setStartAtMaxMAP(val)
                                         if (val) {
                                             setIgnoreMAP(false);
                                         }
-                                    }} />
+                                    }} label={'Always max MAP'} id={'checkbox_max_map' + id} />
                                 </div>
-                                <div className={'twoFifthElement'}>
-                                    <p className={'label'}>Ignore MAP</p>  
-                                    <CheckboxInput value={ignoreMAP} setValue={(val:boolean) => {
+                                <div>
+                                    
+                                <CheckboxButtonInput value={ignoreMAP} setValue={(val:boolean) => {
                                         setIgnoreMAP(val)
                                         if (val) {
                                             setStartAtMaxMAP(false);
                                         }
-                                    }} />
-                                </div>
-                                <div className={'halfElement'} >
-                                    <p className={'label'}>Enemy AC bonus mod</p>                
-                                    <NumberInput min={-20} max={20} value={amountOfExtraAc} setValue={setAmountOfExtraAc} /> 
+                                    }} label={'Ignore MAP'} id={'checkbox_ignore_map' + id} />
                                 </div>
                             </div>
                         </div>

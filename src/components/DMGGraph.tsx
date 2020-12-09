@@ -14,11 +14,12 @@ import { Line } from "react-chartjs-2";
 import EnemyAC from '../jsons/EnemyAC.json';
 
 interface Props {
-    data?: any[]
+    data?: any[];
+    enemyAcMod?: string;
 }
 
 const DMGGraph = (props: Props) => {
-    const { data } = props;
+    const { data, enemyAcMod } = props;
     const styledData = {
         labels: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', 
                  '11', '12', '13', '14', '15', '16', '17', '18', '19', '20'],
@@ -52,7 +53,7 @@ const DMGGraph = (props: Props) => {
                     if(ac === 0) {
                         return '';
                     }
-                    return(<p className={'acText'} key={ac + '_' + index}>{ac}</p>)
+                    return(<p className={'acText'} key={ac + '_' + index}>{ac + (enemyAcMod !== undefined ? parseInt(enemyAcMod) : 0)}</p>)
                 })}
                 </div>
             </Paper>

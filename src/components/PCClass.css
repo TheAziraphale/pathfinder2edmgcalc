@@ -1,5 +1,7 @@
 .pcWrapper {
     margin: 20px;
+    margin-top: 10px;
+    margin-bottom: 0px;
     width: 400px;
 }
 
