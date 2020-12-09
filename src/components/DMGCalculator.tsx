@@ -4,7 +4,7 @@ import NumberInput from './NumberInput';
 import CheckboxInput from './CheckboxInput';
 import CheckboxButtonInput from './CheckboxButtonInput';
 import ClassChoice, { SpecChoice } from './ClassChoice';
-import './DMGCalculator.css';
+import './Components.css';
 import ClassChoices from '../jsons/ClassChoices.json';
 import EnemyAC from '../jsons/EnemyAC.json';
 import Bonuses from '../jsons/Bonuses.json';

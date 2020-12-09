@@ -19,22 +19,23 @@
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    margin-right: 5px;
-    margin-left: 25px;
-    margin-top: -15px;
+    margin-right: 3px;
+    margin-left: 26px;
     margin-bottom: 0px;
+    height: 23px;
 }
 
 .acText {
-    font-size: 11px;
+    font-size: 13px;
     font-style: italic;
+    margin-top: 0px;
 }
 
 .acLabel {
     position: absolute;
     font-size: 12px;
     margin-left: 3px;
-    margin-top: -4px;
+    margin-top: 1px;
     font-weight: 700;
 }
 

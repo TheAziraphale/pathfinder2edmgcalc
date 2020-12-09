@@ -1,6 +1,6 @@
 import { Paper } from '@material-ui/core';
 import React from 'react';
-import './DMGCalculator.css';
+import './Components.css';
 
 interface Props {
     value: string;
@@ -23,7 +23,7 @@ const EnemyACMod = (props: Props) => {
                         setValue(event.target.value)
                     }} />
                     <div className={'enemyACModDescriptionContainer'}>
-                        <p className={'labelName'}>{'(Using standard AC progression for enemies)'}</p>
+                        <p className={'labelName'}>{'(Using standard ac progression for enemies)'}</p>
                     </div>
                 </div>
             </Paper>

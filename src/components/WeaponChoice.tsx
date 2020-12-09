@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import Weapons from '../jsons/Weapons.json';
-import './DMGCalculator.css';
+import './Components.css';
 
 interface Props {
     setWeaponChoice: (weaponChoice: Weapon) => void;

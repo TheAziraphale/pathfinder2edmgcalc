@@ -1,15 +1,6 @@
 import React from 'react';
 import Paper from '@material-ui/core/Paper';
-/*
-import {
-  ArgumentAxis,
-  ValueAxis,
-  Chart,
-  LineSeries,
-  Title,
-} from '@devexpress/dx-react-chart-material-ui';
-*/
-import './DMGCalculator.css';
+import './Components.css';
 import { Line } from "react-chartjs-2";
 import EnemyAC from '../jsons/EnemyAC.json';
 

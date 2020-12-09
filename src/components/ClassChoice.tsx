@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import './DMGCalculator.css';
+import './Components.css';
 
 interface Props {
     setClassChoice: (classChoice: string) => void;

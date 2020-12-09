@@ -53,15 +53,18 @@
     flex-wrap: wrap;
     margin-top: -2px;
 }
+
 .labelElement {
     margin: 0px;
 }
+
 .labelHeader {
     margin: 0px;
     margin-top: 5px;
     font-size: 16px;
     font-weight: 500;
 }
+
 .elementWrapper {
     border-style: solid;
     border-color: rgb(56, 56, 56);
@@ -70,3 +73,43 @@
     padding: 5px;
     width: 370px;
 }
+
+.colorBar {
+    width: 160px; 
+    height: 16px;
+    margin-top: 10px; 
+    margin-left: 25px;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+}
+
+.colorPicker {
+    background-color:rgb(210, 210, 210);
+    padding: 2px;
+}
+
+.colorPickerWrapper {
+    position: absolute;
+    margin-left: 190px;
+    margin-top: -11px;
+    border-radius: 4px;
+    display: flex;
+    flex-direction: row;
+}
+
+.closeColorPicker {
+    margin-left: 2px;
+    height: 20px;
+    width: 20px;
+    background-color: rgb(220, 220, 220);
+    border-radius: 30px;
+}
+.closeColorPicker::after {
+    content: "\00d7";
+    color: rgb(0, 0, 0);
+    font-weight: 500;
+    font-size: 24px;
+    line-height: 22px;
+    font-family: Arial, sans-serif;
+    padding-left: 3px;
+  }

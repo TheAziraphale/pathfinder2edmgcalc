@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
+import 'rc-color-picker/assets/index.css';
 import ClassChoice, { SpecChoice } from './ClassChoice';
 import { Paper } from '@material-ui/core';
 import './PCClass.css';
@@ -7,6 +8,7 @@ import DiceChoice from './DiceChoice';
 import CheckboxButtonInput from './CheckboxButtonInput';
 import { getClassJson, getAvgDmg } from './HelpFunctions';
 import { getAttackChances } from './HelpFunctions';
+import { HuePicker   } from 'react-color';
 
 interface Props {
     id: string;
@@ -95,6 +97,8 @@ const PCClass = (props: Props) => {
     const [rage, setRage] = useState<boolean>(false);
     const [deviseAStratagem, setDeviseAStratagem] = useState<boolean>(false);
     const [lastAttackWithFinisher, setLastAttackWithFinisher] = useState<boolean>(false);
+    const [currentColor, setCurrentColor] = useState<string>(color);
+    const [showHuePicker, setShowHuePicker] = useState<boolean>(false);
     
     useEffect(() => {
         const weaponDices: WeaponDices = {
@@ -141,7 +145,8 @@ const PCClass = (props: Props) => {
     }, [
         classChoice, classSpec, strength, dexterity, intelligence, diceSize, deadlyDiceSize, fatalDiceSize, agile, backstabber, finesse, forceful, 
         twin, critRange, weaponType, rangedDmgBonus, applyPlusHitRunes, applyStrikingRunes, startAtMaxMAP, ignoreMAP, hitBonus,  dmgBonus, 
-        canUseDexForDmg, applySneakDmg,  applyPanache,  markedTarget, rage,  deviseAStratagem, lastAttackWithFinisher, amountOfAttacks, enemyAcMod
+        canUseDexForDmg, applySneakDmg,  applyPanache,  markedTarget, rage,  deviseAStratagem, lastAttackWithFinisher, amountOfAttacks, enemyAcMod,
+        currentColor
     ])
 
     const doesClassHaveASpec = useCallback(() => {
@@ -221,7 +226,7 @@ const PCClass = (props: Props) => {
                 label: (parseInt(id) + 1) +'# ' + (classSpec !== '-' ? Capitalize(classSpec) : '') + ' ' + Capitalize(classChoice),
                 data: attackData,
                 fill: false,
-                borderColor: color,
+                borderColor: currentColor,
             }];
     };
 
@@ -235,7 +240,17 @@ const PCClass = (props: Props) => {
                 <div className={'labelElement'}>
                     <p className={'labelHeader'}>Class and specialization</p>   
                 </div>
-                <div style={{backgroundColor: color, width: 160, height: 16, marginTop: 10, marginLeft: 25, borderTopRightRadius: 10, borderTopLeftRadius: 10 }} />
+                <div onClick={() => { setShowHuePicker(!showHuePicker) }} className={'colorBar'} style={{backgroundColor: currentColor }} />
+                {showHuePicker &&
+                    <div className={'colorPickerWrapper'}>
+                        <div className={'colorPicker'}>
+                            <HuePicker color={currentColor} width={170} disableAlpha={true} onChange={(color) => {
+                                setCurrentColor(color.hex);
+                            } } />
+                        </div>
+                        <div className={'closeColorPicker'} onClick={() => { setShowHuePicker(false) }}></div>
+                    </div>
+                }
                 <div className={'elementWrapper'}>
                     <div className={'elementContainer'}>
                         <div className={'halfElement'}>

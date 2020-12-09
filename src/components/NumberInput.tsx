@@ -1,5 +1,5 @@
 import React from 'react';
-import './DMGCalculator.css';
+import './Components.css';
 
 interface Props {
     value: number;

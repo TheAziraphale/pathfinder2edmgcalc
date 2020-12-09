@@ -20,26 +20,6 @@ const App = () => {
     <div className={'classWrapper'}>
       <DMGGraph data={combinedArray()} enemyAcMod={enemyAcMod} />
       <EnemyACMod min={-20} max={20} value={enemyAcMod} setValue={setEnemyAcMod} />
-      {
-        /*
-      <div className={'dmgCalcRow'}>
-        <DMGCalculator setGraphData={(data:any[]) => {
-          setGraphData0(data);
-        }} id={'0'} color={'blue'} />
-        <DMGCalculator setGraphData={(data:any[]) => {
-          setGraphData1(data);
-        }} id={'1'} color={'red'} />
-      </div>
-      <div className={'dmgCalcRow'}>
-        <DMGCalculator setGraphData={(data:any[]) => {
-          setGraphData2(data);
-        }} id={'2'} color={'green'} />
-        <DMGCalculator setGraphData={(data:any[]) => {
-          setGraphData3(data);
-        }} id={'3'} color={'yellow'} />
-      </div>
-        */
-      }
       <div className={'dmgCalcRow'}>
         <PCClass id={"0"} color={'blue'} enemyAcMod={enemyAcMod} setGraphData={setGraphData0} />
         <PCClass id={"1"} color={'red'} enemyAcMod={enemyAcMod} setGraphData={setGraphData1} />
