@@ -74,13 +74,32 @@ const PCClass = (props: Props) => {
 
         setApplySneakDmg(classChoice === 'rogue');
         setApplyPanache(classChoice === 'swashbuckler');
-        setLastAttackWithFinisher(classChoice === 'rogue');
+        setLastAttackWithFinisher(false);
         setMarkedTarget(classChoice === 'ranger');
         setRage(classChoice === 'barbarian');
         setDeviseAStratagem(classChoice === 'investigator');
         setStrength('18');
         setDexterity('18');
         setIntelligence('18');
+        setCanUseDexForDmg(false);
+        setDiceSize('4');
+        setDeadlyDiceSize('-');
+        setFatalDiceSize('-');
+        setAgile(false);
+        setBackstabber(false);
+        setFinesse(false);
+        setForceful(false);
+        setTwin(false);
+        setCritRange('20');
+        setWeaponType('Melee');
+        setRangedDmgBonus('-');
+        setApplyPlusHitRunes(true);
+        setApplyStrikingRunes(true);
+        setStartAtMaxMAP(false);
+        setIgnoreMAP(false);
+        setHitBonus('0');
+        setAmountOfAttacks('1');
+        setAmountOfExtraAc('0');
     }, [classChoice]);
 
     useEffect(() => {
