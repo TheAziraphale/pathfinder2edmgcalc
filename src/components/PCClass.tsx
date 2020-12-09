@@ -5,16 +5,8 @@ import './PCClass.css';
 import NumberInput from './NumberInput';
 import DiceChoice from './DiceChoice';
 import CheckboxButtonInput from './CheckboxButtonInput';
-import ClassChoices from '../jsons/ClassChoices.json';
-import EnemyAC from '../jsons/EnemyAC.json';
-import Bonuses from '../jsons/Bonuses.json';
-
-interface AttackChance {
-    criticalHitChance: number;
-    hitChance: number;
-    missChance: number;
-    criticalFailureChance: number;
-}
+import { getClassJson, getAvgDmg } from './HelpFunctions';
+import { getAttackChances } from './HelpFunctions';
 
 interface Props {
     id: string;
@@ -23,62 +15,154 @@ interface Props {
     enemyAcMod?: string;
 }
 
-const RangerPrecisionDiceSize = 8;
-const RogueSneakDmgDice = 6;
+interface Stats {
+    strength: number;
+    dexterity: number;
+    intelligence: number;
+}
+
+interface WeaponDices {
+    diceSize: string;
+    deadlyDiceSize: string;
+    fatalDiceSize: string;
+}
+
+interface WeaponTraits {
+    agile: boolean;
+    backstabber: boolean;
+    finesse: boolean;
+    forceful: boolean;
+    twin: boolean;
+}
+
+export interface PCState {
+    classChoice: string;
+    classSpec: string;
+    stats: Stats;
+    weaponDices: WeaponDices;
+    weaponTraits: WeaponTraits;
+    critRange:number;
+    weaponType: string;
+    rangedDmgBonus: string;
+    applyPlusHitRunes: boolean;
+    applyStrikingRunes: boolean;
+    startAtMaxMAP: boolean;
+    ignoreMAP: boolean;
+    hitBonus: number;
+    dmgBonus: number;
+    canUseDexForDmg: boolean;
+    applySneakDmg: boolean;
+    applyPanache: boolean;
+    markedTarget: boolean;
+    rage: boolean;
+    deviseAStratagem: boolean;
+    lastAttackWithFinisher: boolean;
+    amountOfAttacks: number;
+}
+
 const SwashbucklerFinisherDmgDice = 6;
-const InvestigatorPrecisionDiceSize = 6;
 
 const PCClass = (props: Props) => {
     const { id, color, setGraphData, enemyAcMod } = props;
+    const [currentPCState, setCurrentPCState] = useState<PCState>();
     const [classChoice, setClassChoice] = useState<string>('-');
     const [classSpec, setClassSpec] = useState<string>('-');
-    const [strength, setStrength] = useState<string>('18');
-    const [dexterity, setDexterity] = useState<string>('18');
-    const [intelligence, setIntelligence] = useState<string>('18');
-    const [canUseDexForDmg, setCanUseDexForDmg] = useState<boolean>(false);
-    const [diceSize, setDiceSize] = useState('4');
-    const [deadlyDiceSize, setDeadlyDiceSize] = useState('-');
-    const [fatalDiceSize, setFatalDiceSize] = useState('-');
-    const [agile, setAgile] = useState(false);
-    const [backstabber, setBackstabber] = useState(false);
-    const [finesse, setFinesse] = useState(false);
-    const [forceful, setForceful] = useState(false);
-    const [twin, setTwin] = useState(false);
-    const [critRange, setCritRange] = useState('20');
+    const [diceSize, setDiceSize] = useState<string>('4');
+    const [deadlyDiceSize, setDeadlyDiceSize] = useState<string>('-');
+    const [fatalDiceSize, setFatalDiceSize] = useState<string>('-');
     const [weaponType, setWeaponType] = useState<string>('Melee');
     const [rangedDmgBonus, setRangedDmgBonus] = useState<string>('-');
-    const [applyPlusHitRunes, setApplyPlusHitRunes] = useState(true);
-    const [applyStrikingRunes, setApplyStrikingRunes] = useState(true);
-    const [startAtMaxMAP, setStartAtMaxMAP] = useState(false);
-    const [ignoreMAP, setIgnoreMAP] = useState(false);
-    const [hitBonus, setHitBonus] = useState<string>('0');
-    const [dmgBonus, setDmgBonus] = useState<string>('0');
-    const [applySneakDmg, setApplySneakDmg] = useState(false);
-    const [applyPanache, setApplyPanache] = useState(false);
-    const [markedTarget, setMarkedTarget] = useState(false);
-    const [rage, setRage] = useState(false);
-    const [deviseAStratagem, setDeviseAStratagem] = useState(false);
-    const [lastAttackWithFinisher, setLastAttackWithFinisher] = useState(false);
-    const [amountOfAttacks, setAmountOfAttacks] = useState('1');
+    const [strength, setStrength] = useState<number>(18);
+    const [dexterity, setDexterity] = useState<number>(18);
+    const [intelligence, setIntelligence] = useState<number>(18);
+    const [critRange, setCritRange] = useState<number>(20);
+    const [amountOfAttacks, setAmountOfAttacks] = useState<number>(1);
+    const [hitBonus, setHitBonus] = useState<number>(0);
+    const [dmgBonus, setDmgBonus] = useState<number>(0);
+    const [canUseDexForDmg, setCanUseDexForDmg] = useState<boolean>(false);
+    const [agile, setAgile] = useState<boolean>(false);
+    const [backstabber, setBackstabber] = useState<boolean>(false);
+    const [finesse, setFinesse] = useState<boolean>(false);
+    const [forceful, setForceful] = useState<boolean>(false);
+    const [twin, setTwin] = useState<boolean>(false);
+    const [applyPlusHitRunes, setApplyPlusHitRunes] = useState<boolean>(true);
+    const [applyStrikingRunes, setApplyStrikingRunes] = useState<boolean>(true);
+    const [startAtMaxMAP, setStartAtMaxMAP] = useState<boolean>(false);
+    const [ignoreMAP, setIgnoreMAP] = useState<boolean>(false);
+    const [applySneakDmg, setApplySneakDmg] = useState<boolean>(false);
+    const [applyPanache, setApplyPanache] = useState<boolean>(false);
+    const [markedTarget, setMarkedTarget] = useState<boolean>(false);
+    const [rage, setRage] = useState<boolean>(false);
+    const [deviseAStratagem, setDeviseAStratagem] = useState<boolean>(false);
+    const [lastAttackWithFinisher, setLastAttackWithFinisher] = useState<boolean>(false);
+    
+    useEffect(() => {
+        const weaponDices: WeaponDices = {
+            diceSize, 
+            deadlyDiceSize, 
+            fatalDiceSize
+        };
+        const stats: Stats = {
+            strength,
+            dexterity,
+            intelligence
+        };
+        const weaponTraits: WeaponTraits = {
+            agile, 
+            backstabber,
+            finesse,
+            forceful,
+            twin
+        };
+        setCurrentPCState({
+            classChoice, 
+            classSpec,
+            stats: stats,
+            weaponDices: weaponDices,
+            weaponTraits: weaponTraits,
+            critRange,
+            weaponType,
+            rangedDmgBonus,
+            applyPlusHitRunes,
+            applyStrikingRunes,
+            startAtMaxMAP,
+            ignoreMAP,
+            hitBonus,
+            dmgBonus,
+            canUseDexForDmg,
+            applySneakDmg,
+            applyPanache,
+            markedTarget,
+            rage,
+            deviseAStratagem,
+            lastAttackWithFinisher,
+            amountOfAttacks,
+        })
+    }, [
+        classChoice, classSpec, strength, dexterity, intelligence, diceSize, deadlyDiceSize, fatalDiceSize, agile, backstabber, finesse, forceful, 
+        twin, critRange, weaponType, rangedDmgBonus, applyPlusHitRunes, applyStrikingRunes, startAtMaxMAP, ignoreMAP, hitBonus,  dmgBonus, 
+        canUseDexForDmg, applySneakDmg,  applyPanache,  markedTarget, rage,  deviseAStratagem, lastAttackWithFinisher, amountOfAttacks, enemyAcMod
+    ])
 
     const doesClassHaveASpec = useCallback(() => {
-        if (classChoice === 'barbarian' || classChoice === 'ranger') {
+        if (currentPCState.classChoice === 'barbarian' || currentPCState.classChoice === 'ranger') {
             return true;
         }
 
         return false;
-    }, [classChoice])
+    }, [currentPCState])
 
     useEffect(() => {
+        /* Reset values when classChoice is set */
         setApplySneakDmg(classChoice === 'rogue');
         setApplyPanache(classChoice === 'swashbuckler');
         setLastAttackWithFinisher(false);
         setMarkedTarget(classChoice === 'ranger');
         setRage(classChoice === 'barbarian');
         setDeviseAStratagem(classChoice === 'investigator');
-        setStrength('18');
-        setDexterity('18');
-        setIntelligence('18');
+        setStrength(18);
+        setDexterity(18);
+        setIntelligence(18);
         setCanUseDexForDmg(false);
         setDiceSize('4');
         setDeadlyDiceSize('-');
@@ -88,68 +172,30 @@ const PCClass = (props: Props) => {
         setFinesse(false);
         setForceful(false);
         setTwin(false);
-        setCritRange('20');
+        setCritRange(20);
         setWeaponType('Melee');
         setRangedDmgBonus('-');
         setApplyPlusHitRunes(true);
         setApplyStrikingRunes(true);
         setStartAtMaxMAP(false);
         setIgnoreMAP(false);
-        setHitBonus('0');
-        setDmgBonus('0');
-        setAmountOfAttacks('1');
+        setHitBonus(0);
+        setDmgBonus(0);
+        setAmountOfAttacks(1);
     }, [classChoice]);
 
     useEffect(() => {
-        if(classChoice === '-' || (doesClassHaveASpec() && classSpec === '-')) {
+        if(currentPCState === undefined || currentPCState.classChoice === '-' || (doesClassHaveASpec() && currentPCState.classSpec === '-')) {
             setGraphData([]);
         } else {
             setGraphData(getDamageChart());
         }
-        // eslint-disable-next-line
-    }, [
-        classChoice, 
-        classSpec,
-        agile, 
-        diceSize, 
-        deadlyDiceSize, 
-        fatalDiceSize, 
-        amountOfAttacks,
-        critRange,
-        startAtMaxMAP,
-        ignoreMAP,
-        rangedDmgBonus,
-        strength,
-        dexterity,
-        intelligence,
-        applySneakDmg,
-        applyPanache,
-        lastAttackWithFinisher,
-        backstabber,
-        forceful,
-        twin,
-        rage,
-        finesse,
-        canUseDexForDmg,
-        markedTarget,
-        deviseAStratagem,
-        applyPlusHitRunes,
-        applyStrikingRunes,
-        weaponType,
-        hitBonus,
-        dmgBonus,
-        enemyAcMod
-    ])
+    // eslint-disable-next-line
+    }, [currentPCState]);
 
-    const getClassJson = useCallback(() => {
-        if (classChoice === 'barbarian') {
-            return ClassChoices[classChoice][classSpec];
-        } else if (classChoice === 'ranger') {
-            return ClassChoices[classChoice][classSpec];
-        }
-
-        return ClassChoices[classChoice];
-    },[classChoice, classSpec])
+    const getClassJsonInternal = useCallback(() => {
+        return getClassJson(currentPCState.classChoice, currentPCState.classSpec);
+    },[currentPCState])
 
     const getDamageChart = () => {
         let level = 1;
@@ -158,29 +204,15 @@ const PCClass = (props: Props) => {
 
         while(level < 21) {
             let totalAmountOfDmg = 0;
-            for(let attack = 1; attack <= parseInt(amountOfAttacks); attack++) {
-                const attackChances = getAttackChances(attack, level);
-                const lastAttack = attack === parseInt(amountOfAttacks);
-                totalAmountOfDmg += (attackChances.hitChance / 100) * getAvgDmg(false, level, lastAttack, attack);
-                totalAmountOfDmg += (attackChances.criticalHitChance / 100) * getAvgDmg(true, level, lastAttack, attack);
-
-                if (classChoice === 'ranger' && classSpec === 'precision' && markedTarget) {
-                    if(attack === 1) {
-                        totalAmountOfDmg += (attackChances.hitChance / 100) * (RangerPrecisionDiceSize/2 + 0.5) * getClassJson().precision1AttackDice[level];
-                        totalAmountOfDmg += (attackChances.criticalHitChance / 100) * (RangerPrecisionDiceSize/2 + 0.5) * 2 * getClassJson().precision1AttackDice[level];
-                    } else if(attack === 2) {
-                        totalAmountOfDmg += (attackChances.hitChance / 100) * (RangerPrecisionDiceSize/2 + 0.5) * getClassJson().precision2AttacksDice[level];
-                        totalAmountOfDmg += (attackChances.criticalHitChance / 100) * (RangerPrecisionDiceSize/2 + 0.5) * 2 * getClassJson().precision2AttacksDice[level];
-                    } else if(attack === 3) {
-                        totalAmountOfDmg += (attackChances.hitChance / 100) * (RangerPrecisionDiceSize/2 + 0.5) * getClassJson().precision3AttacksDice[level];
-                        totalAmountOfDmg += (attackChances.criticalHitChance / 100) * (RangerPrecisionDiceSize/2 + 0.5) * 2 * getClassJson().precision3AttacksDice[level];
-                    }
-                }
+            for(let attack = 1; attack <= amountOfAttacks; attack++) {
+                const attackChances = getAttackChances(currentPCState, attack, level, parseInt(enemyAcMod));
+                const lastAttack = attack === amountOfAttacks;
+                totalAmountOfDmg += (attackChances.hitChance / 100) * getAvgDmg(currentPCState, false, level, lastAttack, attack);
+                totalAmountOfDmg += (attackChances.criticalHitChance / 100) * getAvgDmg(currentPCState, true, level, lastAttack, attack);
 
                 if (classChoice === 'swashbuckler' && applyPanache && lastAttackWithFinisher && lastAttack) {
-                    totalAmountOfDmg += ((attackChances.missChance / 100) * (SwashbucklerFinisherDmgDice/2 + 0.5) * getClassJson().panacheBonus[level]) / 2;
+                    totalAmountOfDmg += ((attackChances.missChance / 100) * (SwashbucklerFinisherDmgDice/2 + 0.5) * getClassJsonInternal().panacheBonus[level]) / 2;
                 }
-
             }
             attackData.push(totalAmountOfDmg);
             level++;
@@ -196,195 +228,6 @@ const PCClass = (props: Props) => {
     const Capitalize = (str:string) => {
         return str.charAt(0).toUpperCase() + str.slice(1);
     }
-
-    const getAbilityBonus = (level:number, stat:"Hit" | "Dmg", overrideStat?:number) => {
-        let abilityStat = 0;  
-
-        if (stat === 'Hit') {
-            abilityStat = overrideStat !== undefined ? overrideStat : (finesse && parseInt(dexterity) > parseInt(strength)) || weaponType === 'Ranged' ?  parseInt(dexterity) : parseInt(strength);
-        } else {
-            abilityStat = overrideStat !== undefined ? overrideStat : (finesse && canUseDexForDmg && parseInt(dexterity) > parseInt(strength)) ? parseInt(dexterity) : parseInt(strength);
-        }
-
-        let increases = Bonuses['AbilityIncrease'].boost[level];
-
-        while(increases > 0) {
-            if(abilityStat >= 18) {
-                abilityStat ++;
-            } else {
-                abilityStat += 2;
-            }
-            increases --;
-        }
-
-        return Math.floor((abilityStat-10) / 2);
-    }
-
-    const getAvgDmg = (crit:boolean, level:number, lastAttack?: boolean, attack?: number) => {
-        const numberOfDice = applyStrikingRunes ? Bonuses['EnchantingBonuses'].striking[level] + 1 : 1;
-        let dmgFromAbility = getAbilityBonus(level, 'Dmg');
-
-        if (weaponType === 'Ranged') {
-            dmgFromAbility = rangedDmgBonus === 'propulsive' ?  Math.floor(dmgFromAbility/2) : rangedDmgBonus === 'thrown' ? dmgFromAbility : 0;
-        }
-
-        let bonusDmg = getClassJson().dmg[level] + dmgFromAbility;
-
-        if (applySneakDmg && classChoice === 'rogue') {
-            bonusDmg += getClassJson().sneakDmgDiceAmount[level] * (RogueSneakDmgDice/2 + 0.5 );
-        }
-
-        if(applyPanache && classChoice === 'swashbuckler') {
-            if(lastAttack && lastAttackWithFinisher) {
-                bonusDmg += getClassJson().panacheBonus[level] * (SwashbucklerFinisherDmgDice/2 + 0.5)
-            } else {
-                bonusDmg += getClassJson().panacheBonus[level]
-            }
-        }
-
-        if (rage && classChoice === 'barbarian') {
-            bonusDmg += getClassJson().rage[level];
-        }
-
-        if (classChoice === 'investigator' && attack === 1 && deviseAStratagem) {
-            bonusDmg += getClassJson().precisionDiceAmount[level] * (InvestigatorPrecisionDiceSize/2 + 0.5 );
-        }
-
-        if (twin && attack !== 1) {
-            bonusDmg += numberOfDice;
-        }
-
-        if (backstabber) {
-            bonusDmg ++;
-            if (applyPlusHitRunes && Bonuses['EnchantingBonuses'].hitBonus[level] >= 3) {
-                bonusDmg++;
-            }
-        }
-
-        if (forceful) {
-            if(attack === 2) {
-                bonusDmg += numberOfDice;
-            } else if (attack > 2) {
-                bonusDmg += numberOfDice *2;
-            }
-        }
-
-        bonusDmg += parseInt(dmgBonus);
-
-        const deadlyProgression = Bonuses['DeadlyProgression'].diceAmount[level];
-
-        if (crit) {
-            let dmg = ((fatalDiceSize === '-' ? 
-            parseInt(diceSize)/2 + 0.5 : 
-            parseInt(fatalDiceSize)/2 + 0.5) * numberOfDice + bonusDmg) * 2;
-
-            if(fatalDiceSize !== '-') {
-                dmg += parseInt(fatalDiceSize)/2 + 0.5;
-            }
-
-            if(deadlyDiceSize !== '-') {
-                dmg += (parseInt(deadlyDiceSize)/2 + 0.5) * deadlyProgression;
-            }
-
-            return dmg;
-        } else {
-            return (parseInt(diceSize)/2 + 0.5) * numberOfDice + bonusDmg;
-        }
-    }
-
-    const getAttackChances = (attack: number, level:number) => {
-        let criticalHitChance: number = 0;
-        let hitChance: number = 0;
-        let missChance: number = 0;
-        let criticalFailureChance: number = 0;
-
-        let totalHitChance = getTotalHitBonus(level, attack);
-
-        if (!ignoreMAP) {
-            if (attack === 2 && !startAtMaxMAP) {
-                const secondAttackMod = (classChoice === 'ranger' && classSpec === 'flurry' && markedTarget ? 
-                getClassJson().flurrySecondAttack[level]
-                : -5) + (agile ? 1 : 0);
-
-                totalHitChance += secondAttackMod;
-            } else if (attack > 2 || startAtMaxMAP) {
-                const thirdAttackMod = (classChoice === 'ranger' && classSpec === 'flurry' && markedTarget ? 
-                getClassJson().flurryThirdAttack[level]
-                : -10) + (agile ? 2 : 0);
-
-                totalHitChance += thirdAttackMod;
-            }
-        }
-
-        const enemyAC = getEnemyAc(level);
-        const difference:number = totalHitChance - enemyAC;
-
-        let critRangeNum:number = parseInt(critRange);
-        for(let diceResult = 1; diceResult <= 20; diceResult++) {
-            if(difference + diceResult >= 10) {
-                if (diceResult === 1) {
-                    hitChance += 5;
-                }
-                else {
-                    criticalHitChance += 5;
-                }
-            } else if (difference + diceResult >= 0) {
-                if (diceResult >= critRangeNum) {
-                    criticalHitChance += 5;
-                } if (diceResult === 1) {
-                    missChance += 5;
-                }
-                else {
-                    hitChance += 5;
-                }
-            } else if (difference + diceResult >= -10) {
-                if (diceResult >= critRangeNum) {
-                    hitChance += 5;
-                } if (diceResult === 1) {
-                    criticalFailureChance += 5;
-                }
-                else {
-                    missChance += 5;
-                }
-            } else {
-                if (diceResult >= critRangeNum) {
-                    missChance += 5;
-                }
-                else {
-                    criticalFailureChance += 5;
-                }
-            }
-        }
-
-        const attackChance: AttackChance = {
-            criticalHitChance,
-            hitChance,
-            missChance,
-            criticalFailureChance
-        };
-
-        return attackChance;
-    }
-
-    const getTotalHitBonus = (level: number, attack?:number) => {
-        if(ClassChoices !== undefined && getClassJson() !== undefined) {
-            const classHitBonus = getClassJson().hit[level];
-            let abilityBonus = getAbilityBonus(level, 'Hit');
-            if ((attack === 1 && classChoice === 'investigator') && deviseAStratagem) {
-                abilityBonus = getAbilityBonus(level, 'Hit', parseInt(intelligence));
-            }
-            const enchantmentHitBonus = applyPlusHitRunes ? Bonuses['EnchantingBonuses'].hitBonus[level] : 0;
-
-            return classHitBonus + enchantmentHitBonus + abilityBonus + level + parseInt(hitBonus);
-        }
-
-        return 0;
-    };
-
-    const getEnemyAc = (level: number) => {
-        const enemyAc = EnemyAC['ac'][level];
-        return enemyAc + parseInt(enemyAcMod);
-    };
 
     return (
         <div className={'pcWrapper'}>
@@ -411,7 +254,7 @@ const PCClass = (props: Props) => {
                         {classChoice !== '-' && doesClassHaveASpec() && (
                             <div className={'halfElement'}>
                                 <p className={'label'}>Choose your spec</p>                
-                                <SpecChoice setSpecChoice={setClassSpec} classId={classChoice} noLabel={true} />
+                                <SpecChoice setSpecChoice={setClassSpec} classId={currentPCState.classChoice} noLabel={true} />
                             </div>
                         )}
                     </div>
@@ -425,29 +268,29 @@ const PCClass = (props: Props) => {
                             <div className={'elementContainer'}>
                                 <div className={'quarterElement'} >
                                     <p className={'label'}>Strength</p>                
-                                    <NumberInput min={8} max={18} value={strength} setValue={setStrength} /> 
+                                    <NumberInput min={8} max={18} value={currentPCState.stats.strength} setValue={setStrength} /> 
                                 </div>
                                 <div className={'quarterElement'}>
                                     <p className={'label'}>Dexterity</p>                
-                                    <NumberInput min={8} max={18} value={dexterity} setValue={setDexterity} /> 
+                                    <NumberInput min={8} max={18} value={currentPCState.stats.dexterity} setValue={setDexterity} /> 
                                 </div>
                                 {classChoice === 'investigator' && (  
                                     <div className={'quarterElement'}>
                                         <p className={'label'}>Intelligence</p>                
-                                        <NumberInput min={8} max={18} value={intelligence} setValue={setIntelligence} /> 
+                                        <NumberInput min={8} max={18} value={currentPCState.stats.intelligence} setValue={setIntelligence} /> 
                                     </div>
                                 )}
                                 {classChoice === 'swashbuckler' && 
                                     <div className={'halfElement'}>
                                         <p className={'label'}>Abilities</p>
                                         <div className={'buttonCheckboxWrapper'}>
-                                            <CheckboxButtonInput value={applyPanache} setValue={(val:boolean) => {
+                                            <CheckboxButtonInput value={currentPCState.applyPanache} setValue={(val:boolean) => {
                                                 setApplyPanache(val);
-                                                if(!applyPanache) {
+                                                if(!currentPCState.applyPanache) {
                                                     setLastAttackWithFinisher(false);
                                                 }
                                             }} label={'Panache'} id={'checkbox_panache' + id} />
-                                            {applyPanache && <CheckboxButtonInput value={lastAttackWithFinisher} setValue={setLastAttackWithFinisher} label={'Last attack - finisher'} id={'checkbox_finisher' + id} />} 
+                                            {currentPCState.applyPanache && <CheckboxButtonInput value={currentPCState.lastAttackWithFinisher} setValue={setLastAttackWithFinisher} label={'Last attack - finisher'} id={'checkbox_finisher' + id} />} 
                                         </div>
                                     </div>
                                 }
@@ -455,8 +298,8 @@ const PCClass = (props: Props) => {
                                     <div className={'halfElement'}>
                                         <p className={'label'}>Abilities</p>
                                         <div className={'buttonCheckboxWrapper'}>
-                                            <CheckboxButtonInput fixedWidth={80} value={applySneakDmg} setValue={setApplySneakDmg} label={'Sneak damage'} id={'checkbox_sneak_dmg' + id} />
-                                            <CheckboxButtonInput fixedWidth={88} value={canUseDexForDmg} setValue={setCanUseDexForDmg} label={'Dex for damage'} id={'checkbox_dex_for_dmg' + id} />
+                                            <CheckboxButtonInput fixedWidth={80} value={currentPCState.applySneakDmg} setValue={setApplySneakDmg} label={'Sneak damage'} id={'checkbox_sneak_dmg' + id} />
+                                            <CheckboxButtonInput fixedWidth={88} value={currentPCState.canUseDexForDmg} setValue={setCanUseDexForDmg} label={'Dex for damage'} id={'checkbox_dex_for_dmg' + id} />
                                         </div> 
                                     </div>
                                 )}
@@ -464,7 +307,7 @@ const PCClass = (props: Props) => {
                                     <div className={'quarterElement'}>
                                         <p className={'label'}>Abilities</p>
                                         <div className={'buttonCheckboxWrapper'}>
-                                            <CheckboxButtonInput value={deviseAStratagem} setValue={setDeviseAStratagem} label={'Devise a Stratagem'} id={'checkbox_devise_a_stratagem' + id} />
+                                            <CheckboxButtonInput value={currentPCState.deviseAStratagem} setValue={setDeviseAStratagem} label={'Devise a Stratagem'} id={'checkbox_devise_a_stratagem' + id} />
                                         </div>  
                                     </div>
                                 }
@@ -472,7 +315,7 @@ const PCClass = (props: Props) => {
                                     <div className={'halfElement'}>
                                         <p className={'label'}>Abilities</p> 
                                         <div className={'buttonCheckboxWrapper'}>
-                                            <CheckboxButtonInput value={markedTarget} setValue={setMarkedTarget} label={"Hunter's Edge"} id={'checkbox_hunters_edge' + id} />
+                                            <CheckboxButtonInput value={currentPCState.markedTarget} setValue={setMarkedTarget} label={"Hunter's Edge"} id={'checkbox_hunters_edge' + id} />
                                         </div>  
                                     </div>
                                 }
@@ -480,7 +323,7 @@ const PCClass = (props: Props) => {
                                     <div className={'quarterElement'}>
                                         <p className={'label'}>Abilities</p> 
                                         <div className={'buttonCheckboxWrapper'}>
-                                            <CheckboxButtonInput value={rage} setValue={setRage} label={"Raging"} id={'checkbox_rage' + id} />
+                                            <CheckboxButtonInput value={currentPCState.rage} setValue={setRage} label={"Raging"} id={'checkbox_rage' + id} />
                                         </div>  
                                     </div>
                                 }
@@ -494,7 +337,6 @@ const PCClass = (props: Props) => {
                                 <div className={'quarterElement'} >
                                     <p className={'label'}>Dice size</p>                
                                     <DiceChoice startDiceValue={'4'} allowNoInput={false} setDiceValue={setDiceSize} /> 
-
                                 </div>
                                 <div className={'quarterElement'} >
                                     <p className={'label'}>Deadly?</p>                
@@ -523,11 +365,11 @@ const PCClass = (props: Props) => {
                                     <div className={'twoThirdElement'}>
                                         <p className={'label'}>Traits</p>   
                                         <div className={'buttonCheckboxWrapper'}>
-                                            <CheckboxButtonInput value={agile} setValue={setAgile} label={'Agile'} id={'checkbox_agile' + id} /> 
-                                            <CheckboxButtonInput value={backstabber} setValue={setBackstabber} label={'Backstabber'} id={'checkbox_backstabber' + id} /> 
-                                            <CheckboxButtonInput value={finesse} setValue={setFinesse} label={'Finesse'} id={'checkbox_finesse' + id} /> 
-                                            <CheckboxButtonInput value={forceful} setValue={setForceful} label={'Forceful'} id={'checkbox_forceful' + id} /> 
-                                            <CheckboxButtonInput value={twin} setValue={setTwin} label={'Twin'} id={'checkbox_twin' + id} /> 
+                                            <CheckboxButtonInput value={currentPCState.weaponTraits.agile} setValue={setAgile} label={'Agile'} id={'checkbox_agile' + id} /> 
+                                            <CheckboxButtonInput value={currentPCState.weaponTraits.backstabber} setValue={setBackstabber} label={'Backstabber'} id={'checkbox_backstabber' + id} /> 
+                                            <CheckboxButtonInput value={currentPCState.weaponTraits.finesse} setValue={setFinesse} label={'Finesse'} id={'checkbox_finesse' + id} /> 
+                                            <CheckboxButtonInput value={currentPCState.weaponTraits.forceful} setValue={setForceful} label={'Forceful'} id={'checkbox_forceful' + id} /> 
+                                            <CheckboxButtonInput value={currentPCState.weaponTraits.twin} setValue={setTwin} label={'Twin'} id={'checkbox_twin' + id} /> 
                                         </div>
                                     </div>
                                 )}
@@ -552,10 +394,10 @@ const PCClass = (props: Props) => {
                             </div>
                             <div className={'elementContainer'} style={{height: 25}}>
                                 <div style={{marginRight: 5}}>
-                                    <CheckboxButtonInput value={applyPlusHitRunes} setValue={setApplyPlusHitRunes} label={'Hit runes (+1, +2, +3)'} id={'checkbox_hit_runes' + id} /> 
+                                    <CheckboxButtonInput value={currentPCState.applyPlusHitRunes} setValue={setApplyPlusHitRunes} label={'Hit runes (+1, +2, +3)'} id={'checkbox_hit_runes' + id} /> 
                                 </div>
                                 <div>
-                                    <CheckboxButtonInput value={applyStrikingRunes} setValue={setApplyStrikingRunes} label={'Striking runes'} id={'checkbox_striking_runes' + id} /> 
+                                    <CheckboxButtonInput value={currentPCState.applyStrikingRunes} setValue={setApplyStrikingRunes} label={'Striking runes'} id={'checkbox_striking_runes' + id} /> 
                                 </div>
                             </div>
                         </div>
@@ -566,20 +408,20 @@ const PCClass = (props: Props) => {
                             <div className={'elementContainer'}>
                                 <div className={'oneThirdElement'} style={{width: 140}} >
                                     <p className={'label'}>Number of attacks</p>                
-                                    <NumberInput min={1} max={10} value={amountOfAttacks} setValue={setAmountOfAttacks} /> 
+                                    <NumberInput min={1} max={10} value={currentPCState.amountOfAttacks} setValue={setAmountOfAttacks} /> 
                                 </div>
                                 <div className={'twoFifthElement'}>
                                     <p className={'label'}>Bonus to hit</p>  
-                                    <NumberInput min={-20} max={20} value={hitBonus} setValue={setHitBonus} /> 
+                                    <NumberInput min={-20} max={20} value={currentPCState.hitBonus} setValue={setHitBonus} /> 
                                  </div>
                                 <div className={'oneThirdElement'}>
                                     <p className={'label'}>Bonus to damage</p>  
-                                    <NumberInput min={-20} max={20} value={dmgBonus} setValue={setDmgBonus} /> 
+                                    <NumberInput min={-20} max={20} value={currentPCState.dmgBonus} setValue={setDmgBonus} /> 
                                  </div>
                             </div>
                             <div className={'elementContainer'} style={{height: 25}}>
                                 <div style={{marginRight: 5}}>
-                                <CheckboxButtonInput value={startAtMaxMAP} setValue={(val:boolean) => {
+                                <CheckboxButtonInput value={currentPCState.startAtMaxMAP} setValue={(val:boolean) => {
                                         setStartAtMaxMAP(val)
                                         if (val) {
                                             setIgnoreMAP(false);
@@ -588,7 +430,7 @@ const PCClass = (props: Props) => {
                                 </div>
                                 <div>
                                     
-                                <CheckboxButtonInput value={ignoreMAP} setValue={(val:boolean) => {
+                                <CheckboxButtonInput value={currentPCState.ignoreMAP} setValue={(val:boolean) => {
                                         setIgnoreMAP(val)
                                         if (val) {
                                             setStartAtMaxMAP(false);

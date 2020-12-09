@@ -2,8 +2,8 @@ import React from 'react';
 import './DMGCalculator.css';
 
 interface Props {
-    value: string;
-    setValue:(value:string) => void
+    value: number;
+    setValue:(value:number) => void
     label?: string;
     min?: number;
     max?: number
@@ -20,7 +20,7 @@ const NumberInput = (props: Props) => {
                 </div>
             )}
             <input className={'inputNumber'}  type={'number'} min={min} max={max} value={value} onChange={(event) => { 
-                setValue(event.target.value)
+                setValue(parseInt(event.target.value))
             }} />
         </div>
     )

@@ -33,12 +33,12 @@ const DMGCalculator = (props: Props) => {
 
     const [classChoice, setClassChoice] = useState<string>('-');
     const [classSpec, setClassSpec] = useState<string>('-');
-    const [amountOfAttacks, setAmountOfAttacks] = useState('1');
-    const [amountOfExtraAc, setAmountOfExtraAc] = useState('0');
+    const [amountOfAttacks, setAmountOfAttacks] = useState<number>(1);
+    const [amountOfExtraAc, setAmountOfExtraAc] = useState<number>(0);
     const [diceSize, setDiceSize] = useState('4');
     const [deadlyDiceSize, setDeadlyDiceSize] = useState('-');
     const [fatalDiceSize, setFatalDiceSize] = useState('-');
-    const [critRange, setCritRange] = useState('20');
+    const [critRange, setCritRange] = useState<number>(20);
     const [agile, setAgile] = useState(false);
     const [backstabber, setBackstabber] = useState(false);
     const [forceful, setForceful] = useState(false);
@@ -47,9 +47,9 @@ const DMGCalculator = (props: Props) => {
     const [ignoreMAP, setIgnoreMAP] = useState(false);
     const [ranged, setRanged] = useState(false);
     const [rangedDmgBonus, setRangedDmgBonus] = useState<string>('-');
-    const [hitStat, setHitStat] = useState('18');
-    const [dmgStat, setDmgStat] = useState('18');
-    const [intStat, setIntStat] = useState('18');
+    const [hitStat, setHitStat] = useState<number>(18);
+    const [dmgStat, setDmgStat] = useState<number>(18);
+    const [intStat, setIntStat] = useState<number>(18);
     const [applyPlusHitRunes, setApplyPlusHitRunes] = useState(true);
     const [applyStrikingRunes, setApplyStrikingRunes] = useState(true);
     const [applySneakDmg, setApplySneakDmg] = useState(false);
@@ -66,7 +66,7 @@ const DMGCalculator = (props: Props) => {
         setMarkedTarget(classChoice === 'ranger');
         setRage(classChoice === 'barbarian');
         setDeviseAStratagem(classChoice === 'investigator');
-        setIntStat('18');
+        setIntStat(18);
 
         if ((classChoice !== 'barbarian' && classChoice !== 'ranger')) {
             setClassSpec('-');
@@ -127,9 +127,9 @@ const DMGCalculator = (props: Props) => {
 
         while(level < 21) {
             let totalAmountOfDmg = 0;
-            for(let attack = 1; attack <= parseInt(amountOfAttacks); attack++) {
+            for(let attack = 1; attack <= amountOfAttacks; attack++) {
                 const attackChances = getAttackChances(attack, level);
-                const lastAttack = attack === parseInt(amountOfAttacks);
+                const lastAttack = attack === amountOfAttacks;
                 totalAmountOfDmg += (attackChances.hitChance / 100) * getAvgDmg(false, level, lastAttack, attack);
                 totalAmountOfDmg += (attackChances.criticalHitChance / 100) * getAvgDmg(true, level, lastAttack, attack);
 
@@ -170,9 +170,9 @@ const DMGCalculator = (props: Props) => {
         let abilityStat = 0;  
 
         if (stat === 'Hit') {
-            abilityStat = overrideStat !== undefined ? overrideStat : parseInt(hitStat);
+            abilityStat = overrideStat !== undefined ? overrideStat : hitStat;
         } else {
-            abilityStat = overrideStat !== undefined ? overrideStat : parseInt(dmgStat);
+            abilityStat = overrideStat !== undefined ? overrideStat : dmgStat;
         }
 
         let increases = Bonuses['AbilityIncrease'].boost[level];
@@ -286,7 +286,7 @@ const DMGCalculator = (props: Props) => {
         const enemyAC = getEnemyAc(level);
         const difference:number = totalHitChance - enemyAC;
 
-        let critRangeNum:number = parseInt(critRange);
+        let critRangeNum:number = critRange;
         for(let diceResult = 1; diceResult <= 20; diceResult++) {
             if(difference + diceResult >= 10) {
                 if (diceResult === 1) {
@@ -338,7 +338,7 @@ const DMGCalculator = (props: Props) => {
             const classHitBonus = getClassJson().hit[level];
             let abilityBonus = getAbilityBonus(level, 'Hit');
             if ((attack === 1 && classChoice === 'investigator') && deviseAStratagem) {
-                abilityBonus = getAbilityBonus(level, 'Hit', parseInt(intStat));
+                abilityBonus = getAbilityBonus(level, 'Hit', intStat);
             }
             const enchantmentHitBonus = applyPlusHitRunes ? Bonuses['EnchantingBonuses'].hitBonus[level] : 0;
 
@@ -350,9 +350,8 @@ const DMGCalculator = (props: Props) => {
 
     const getEnemyAc = (level: number) => {
         const enemyAc = EnemyAC['ac'][level];
-        return enemyAc + parseInt(amountOfExtraAc);
+        return enemyAc + amountOfExtraAc;
     };
-
     return (
         <div className={'wrapper'}>
             <Paper className={'innerWrapper'}>
