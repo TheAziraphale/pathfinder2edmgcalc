@@ -1,0 +1,148 @@
+{
+    "PropertyRunes": {
+        "disrupting": {
+            "hitDiceAmount": 1,
+            "hitDiceSize": 6,
+            "critDiceAmount": 2,
+            "critDiceSize": 6,
+            "extraCritDmgDiceAmount": 0,
+            "extraCritDmgDiceSize": 0
+        },
+        "disrupting_greater": {
+            "hitDiceAmount": 2,
+            "hitDiceSize": 6,
+            "critDiceAmount": 4,
+            "critDiceSize": 6,
+            "extraCritDmgDiceAmount": 0,
+            "extraCritDmgDiceSize": 0
+        },
+        "corrosive": {
+            "hitDiceAmount": 1,
+            "hitDiceSize": 6,
+            "critDiceAmount": 2,
+            "critDiceSize": 6,
+            "extraCritDmgDiceAmount": 0,
+            "extraCritDmgDiceSize": 0
+        },
+        "corrosive_greater": {
+            "hitDiceAmount": 1,
+            "hitDiceSize": 6,
+            "critDiceAmount": 2,
+            "critDiceSize": 6,
+            "extraCritDmgDiceAmount": 0,
+            "extraCritDmgDiceSize": 0
+        },
+        "flaming": {
+            "hitDiceAmount": 1,
+            "hitDiceSize": 6,
+            "critDiceAmount": 2,
+            "critDiceSize": 6,
+            "extraCritDmgDiceAmount": 1,
+            "extraCritDmgDiceSize": 10
+        },
+        "flaming_greater": {
+            "hitDiceAmount": 1,
+            "hitDiceSize": 6,
+            "critDiceAmount": 2,
+            "critDiceSize": 6,
+            "extraCritDmgDiceAmount": 2,
+            "extraCritDmgDiceSize": 10
+        },
+        "frost": {
+            "hitDiceAmount": 1,
+            "hitDiceSize": 6,
+            "critDiceAmount": 2,
+            "critDiceSize": 6,
+            "extraCritDmgDiceAmount": 0,
+            "extraCritDmgDiceSize": 0
+        },
+        "frost_greater": {
+            "hitDiceAmount": 1,
+            "hitDiceSize": 6,
+            "critDiceAmount": 2,
+            "critDiceSize": 6,
+            "extraCritDmgDiceAmount": 0,
+            "extraCritDmgDiceSize": 0
+        },
+        "shock": {
+            "hitDiceAmount": 1,
+            "hitDiceSize": 6,
+            "critDiceAmount": 2,
+            "critDiceSize": 6,
+            "extraCritDmgDiceAmount": 4,
+            "extraCritDmgDiceSize": 6
+        },
+        "shock_greater": {
+            "hitDiceAmount": 1,
+            "hitDiceSize": 6,
+            "critDiceAmount": 2,
+            "critDiceSize": 6,
+            "extraCritDmgDiceAmount": 4,
+            "extraCritDmgDiceSize": 6
+        },
+        "thundering": {
+            "hitDiceAmount": 1,
+            "hitDiceSize": 6,
+            "critDiceAmount": 2,
+            "critDiceSize": 6,
+            "extraCritDmgDiceAmount": 0,
+            "extraCritDmgDiceSize": 0
+        },
+        "thundering_greater": {
+            "hitDiceAmount": 1,
+            "hitDiceSize": 6,
+            "critDiceAmount": 2,
+            "critDiceSize": 6,
+            "extraCritDmgDiceAmount": 0,
+            "extraCritDmgDiceSize": 0
+        },
+        "serrating": {
+            "hitDiceAmount": 1,
+            "hitDiceSize": 4,
+            "critDiceAmount": 2,
+            "critDiceSize": 4,
+            "extraCritDmgDiceAmount": 0,
+            "extraCritDmgDiceSize": 0
+        },
+        "anarchic": {
+            "hitDiceAmount": 1,
+            "hitDiceSize": 6,
+            "critDiceAmount": 2,
+            "critDiceSize": 6,
+            "extraCritDmgDiceAmount": 0,
+            "extraCritDmgDiceSize": 0
+        },
+        "axiomatic": {
+            "hitDiceAmount": 0,
+            "hitDiceSize": 0,
+            "critDiceAmount": 0,
+            "critDiceSize": 0,
+            "extraCritDmgDiceAmount": 0,
+            "extraCritDmgDiceSize": 0
+        },
+        "holy": {
+            "hitDiceAmount": 1,
+            "hitDiceSize": 6,
+            "critDiceAmount": 2,
+            "critDiceSize": 6,
+            "extraCritDmgDiceAmount": 0,
+            "extraCritDmgDiceSize": 0
+        },
+        "unholy": {
+            "hitDiceAmount": 1,
+            "hitDiceSize": 6,
+            "critDiceAmount": 2,
+            "critDiceSize": 6,
+            "extraCritDmgDiceAmount": 0,
+            "extraCritDmgDiceSize": 0
+        },
+        "wounding": {
+            "hitDiceAmount": 1,
+            "hitDiceSize": 6,
+            "critDiceAmount": 1,
+            "critDiceSize": 12,
+            "extraCritDmgDiceAmount": 0,
+            "extraCritDmgDiceSize": 0
+        }
+    }
+}

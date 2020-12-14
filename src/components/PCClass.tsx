@@ -9,11 +9,13 @@ import CheckboxButtonInput from './CheckboxButtonInput';
 import { getClassJson, getAvgDmg } from './HelpFunctions';
 import { getAttackChances } from './HelpFunctions';
 import { HuePicker   } from 'react-color';
+import PropertyRuneChoice from './PropertyRuneChoice';
 
 interface Props {
     id: string;
     color: string;
     setGraphData: (data:any[]) => void;
+    acJson: any[];
     enemyAcMod?: string;
 }
 
@@ -58,6 +60,8 @@ export interface PCState {
     markedTarget: boolean;
     rage: boolean;
     deviseAStratagem: boolean;
+    retributiveStrike: boolean;
+    attackOfOpportunity: boolean;
     lastAttackWithFinisher: boolean;
     amountOfAttacks: number;
 }
@@ -65,7 +69,7 @@ export interface PCState {
 const SwashbucklerFinisherDmgDice = 6;
 
 const PCClass = (props: Props) => {
-    const { id, color, setGraphData, enemyAcMod } = props;
+    const { id, color, setGraphData, enemyAcMod, acJson } = props;
     const [currentPCState, setCurrentPCState] = useState<PCState>();
     const [classChoice, setClassChoice] = useState<string>('-');
     const [classSpec, setClassSpec] = useState<string>('-');
@@ -89,6 +93,9 @@ const PCClass = (props: Props) => {
     const [twin, setTwin] = useState<boolean>(false);
     const [applyPlusHitRunes, setApplyPlusHitRunes] = useState<boolean>(true);
     const [applyStrikingRunes, setApplyStrikingRunes] = useState<boolean>(true);
+    const [firstPropRune, setFirstPropRune] = useState<string>('-');
+    const [secondPropRune, setSecondPropRune] = useState<string>('-');
+    const [thirdPropRune, setThirdPropRune] = useState<string>('-');
     const [startAtMaxMAP, setStartAtMaxMAP] = useState<boolean>(false);
     const [ignoreMAP, setIgnoreMAP] = useState<boolean>(false);
     const [applySneakDmg, setApplySneakDmg] = useState<boolean>(false);
@@ -96,6 +103,8 @@ const PCClass = (props: Props) => {
     const [markedTarget, setMarkedTarget] = useState<boolean>(false);
     const [rage, setRage] = useState<boolean>(false);
     const [deviseAStratagem, setDeviseAStratagem] = useState<boolean>(false);
+    const [retributiveStrike, setRetributiveStrike] = useState<boolean>(false);
+    const [attackOfOpportunity, setAttackOfOpportunity] = useState<boolean>(false);
     const [lastAttackWithFinisher, setLastAttackWithFinisher] = useState<boolean>(false);
     const [currentColor, setCurrentColor] = useState<string>(color);
     const [showHuePicker, setShowHuePicker] = useState<boolean>(false);
@@ -139,14 +148,16 @@ const PCClass = (props: Props) => {
             markedTarget,
             rage,
             deviseAStratagem,
+            retributiveStrike,
+            attackOfOpportunity,
             lastAttackWithFinisher,
             amountOfAttacks,
         })
     }, [
         classChoice, classSpec, strength, dexterity, intelligence, diceSize, deadlyDiceSize, fatalDiceSize, agile, backstabber, finesse, forceful, 
         twin, critRange, weaponType, rangedDmgBonus, applyPlusHitRunes, applyStrikingRunes, startAtMaxMAP, ignoreMAP, hitBonus,  dmgBonus, 
-        canUseDexForDmg, applySneakDmg,  applyPanache,  markedTarget, rage,  deviseAStratagem, lastAttackWithFinisher, amountOfAttacks, enemyAcMod,
-        currentColor
+        canUseDexForDmg, applySneakDmg,  applyPanache,  markedTarget, rage,  deviseAStratagem, retributiveStrike, attackOfOpportunity, lastAttackWithFinisher, amountOfAttacks, 
+        enemyAcMod, acJson, currentColor, firstPropRune, secondPropRune, thirdPropRune
     ])
 
     const doesClassHaveASpec = useCallback(() => {
@@ -165,6 +176,8 @@ const PCClass = (props: Props) => {
         setMarkedTarget(classChoice === 'ranger');
         setRage(classChoice === 'barbarian');
         setDeviseAStratagem(classChoice === 'investigator');
+        setRetributiveStrike(false);
+        setAttackOfOpportunity(false);
         setStrength(18);
         setDexterity(18);
         setIntelligence(18);
@@ -187,6 +200,9 @@ const PCClass = (props: Props) => {
         setHitBonus(0);
         setDmgBonus(0);
         setAmountOfAttacks(1);
+        setFirstPropRune('-');
+        setSecondPropRune('-');
+        setThirdPropRune('-');
     }, [classChoice]);
 
     useEffect(() => {
@@ -210,15 +226,24 @@ const PCClass = (props: Props) => {
         while(level < 21) {
             let totalAmountOfDmg = 0;
             for(let attack = 1; attack <= amountOfAttacks; attack++) {
-                const attackChances = getAttackChances(currentPCState, attack, level, parseInt(enemyAcMod));
+                if (attack === 1 && classChoice === 'champion' && retributiveStrike) {
+                    console.log("before:", totalAmountOfDmg);
+                }
+                const attackChances = getAttackChances(currentPCState, attack, level, parseInt(enemyAcMod), acJson);
                 const lastAttack = attack === amountOfAttacks;
-                totalAmountOfDmg += (attackChances.hitChance / 100) * getAvgDmg(currentPCState, false, level, lastAttack, attack);
-                totalAmountOfDmg += (attackChances.criticalHitChance / 100) * getAvgDmg(currentPCState, true, level, lastAttack, attack);
+                totalAmountOfDmg += (attackChances.hitChance / 100) * getAvgDmg(currentPCState, false, level, lastAttack, attack, firstPropRune, secondPropRune, thirdPropRune);
+                totalAmountOfDmg += (attackChances.criticalHitChance / 100) * getAvgDmg(currentPCState, true, level, lastAttack, attack, firstPropRune, secondPropRune, thirdPropRune);
+
+                if (attack === 1 && ((classChoice === 'champion' && retributiveStrike) || (classChoice === 'fighter' && attackOfOpportunity))) {
+                    /* Symbolizes a free extra attack with reaction */
+                    totalAmountOfDmg *= 2;
+                }
 
                 if (classChoice === 'swashbuckler' && applyPanache && lastAttackWithFinisher && lastAttack) {
                     totalAmountOfDmg += ((attackChances.missChance / 100) * (SwashbucklerFinisherDmgDice/2 + 0.5) * getClassJsonInternal().panacheBonus[level]) / 2;
                 }
             }
+            
             attackData.push(totalAmountOfDmg);
             level++;
         }
@@ -326,6 +351,22 @@ const PCClass = (props: Props) => {
                                         </div>  
                                     </div>
                                 }
+                                { classChoice === 'champion' && 
+                                    <div className={'quarterElement'}>
+                                        <p className={'label'}>Abilities</p>
+                                        <div className={'buttonCheckboxWrapper'}>
+                                            <CheckboxButtonInput value={currentPCState.retributiveStrike} setValue={setRetributiveStrike} label={'Retributive Strike'} id={'checkbox_retributive_strike' + id} />
+                                        </div>  
+                                    </div>
+                                }
+                                { classChoice === 'fighter' && 
+                                    <div className={'quarterElement'}>
+                                        <p className={'label'}>Abilities</p>
+                                        <div className={'buttonCheckboxWrapper'}>
+                                            <CheckboxButtonInput value={currentPCState.attackOfOpportunity} setValue={setAttackOfOpportunity} label={'Attack of Opportunity'} id={'checkbox_attack_of_opportunity_fighter' + id} />
+                                        </div>  
+                                    </div>
+                                }
                                 {classChoice === 'ranger' && 
                                     <div className={'halfElement'}>
                                         <p className={'label'}>Abilities</p> 
@@ -407,12 +448,31 @@ const PCClass = (props: Props) => {
                                     </div>
                                 )}
                             </div>
-                            <div className={'elementContainer'} style={{height: 25}}>
-                                <div style={{marginRight: 5}}>
-                                    <CheckboxButtonInput value={currentPCState.applyPlusHitRunes} setValue={setApplyPlusHitRunes} label={'Hit runes (+1, +2, +3)'} id={'checkbox_hit_runes' + id} /> 
+                            <div className={'elementContainer'} style={{height: 50}}>
+                                <div className={'fullElement'} >
+                                    <p className={'label'}>Fundamental runes </p>  
+                                        <div className={'buttonCheckboxWrapper'}>
+                                            <div style={{marginRight: 5}}>
+                                                <CheckboxButtonInput value={currentPCState.applyPlusHitRunes} setValue={setApplyPlusHitRunes} label={'Hit runes (+1, +2, +3)'} id={'checkbox_hit_runes' + id} /> 
+                                            </div>
+                                            <div>
+                                                <CheckboxButtonInput value={currentPCState.applyStrikingRunes} setValue={setApplyStrikingRunes} label={'Striking runes'} id={'checkbox_striking_runes' + id} /> 
+                                            </div>
+                                        </div>
                                 </div>
-                                <div>
-                                    <CheckboxButtonInput value={currentPCState.applyStrikingRunes} setValue={setApplyStrikingRunes} label={'Striking runes'} id={'checkbox_striking_runes' + id} /> 
+                            </div>
+                            <div className={'elementContainer'} style={{height: 50}}>
+                                <div className={'oneThirdElement'} >
+                                    <p className={'label'}>1# Prop. rune</p>  
+                                    <PropertyRuneChoice setPropertyRune={setFirstPropRune} />
+                                </div>
+                                <div className={'oneThirdElement'} >
+                                    <p className={'label'}>2# Prop. rune</p>  
+                                    <PropertyRuneChoice setPropertyRune={setSecondPropRune} />
+                                </div>
+                                <div className={'oneThirdElement'} >
+                                    <p className={'label'}>3# Prop. rune</p>  
+                                    <PropertyRuneChoice setPropertyRune={setThirdPropRune} />
                                 </div>
                             </div>
                         </div>

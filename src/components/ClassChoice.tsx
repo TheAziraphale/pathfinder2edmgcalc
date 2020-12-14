@@ -33,6 +33,10 @@ const classChoices: ClassTypes = {
         id: "barbarian",
         name: "Barbarian"
     },
+    'champion': {
+        id: "champion",
+        name: "Champion"
+    },
     'fighter': {
         id: "fighter",
         name: "Fighter"
@@ -97,15 +101,15 @@ const ClassChoice = (props: Props) => {
     useEffect(() => {
         switch (currentClass) {
             case 'barbarian':
-                setHoverText('Assumes that you are raging');
+                setHoverText('');
                 break;
             case 'fighter':
                 break;
             case 'investigator':
-                setHoverText('Assumes that the first attack is with Devise a Stratagem');
+                setHoverText('');
                 break;
             case 'ranger':
-                setHoverText('Assumes that you have marked your target');
+                setHoverText('');
                 break;
             case 'rogue':
                 setHoverText('');

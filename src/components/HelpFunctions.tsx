@@ -1,7 +1,7 @@
 //import React from 'react';
 import ClassChoices from '../jsons/ClassChoices.json';
 import Bonuses from '../jsons/Bonuses.json';
-import EnemyAC from '../jsons/EnemyAC.json';
+import PropertyRunes from '../jsons/PropertyRunes.json';
 import { PCState } from './PCClass';
 
 export const getTotalHitBonus = (level: number, 
@@ -59,7 +59,40 @@ const RogueSneakDmgDice = 6;
 const SwashbucklerFinisherDmgDice = 6;
 const InvestigatorPrecisionDiceSize = 6;
 
-export const getAvgDmg = (currentPCState: PCState, crit:boolean, level:number, lastAttack?: boolean, attack?: number) => {
+const getBonusDamageFromSpecificRune = (runeName: string, crit:boolean) => {
+    const propRune: any = PropertyRunes['PropertyRunes'][runeName];
+
+    if (propRune !== undefined) {
+        if (crit) {
+            return propRune.critDiceAmount * (propRune.critDiceSize / 2 + 0.5) + propRune.extraCritDmgDiceAmount * (propRune.extraCritDmgDiceSize / 2 + 0.5);
+        } else {
+            return propRune.hitDiceAmount * (propRune.hitDiceSize / 2 + 0.5)
+        }
+    }
+
+    return 0;
+}
+
+const getExtraDamageFromPropertyRunes = (level:number, crit:boolean, firstPropRune?: string, secondPropRune?: string, thirdPropRune?: string) => {
+    const enchantingBonus = Bonuses['EnchantingBonuses'].hitBonus[level];
+    let extraDmg = 0;
+    if(enchantingBonus >= 1 && (firstPropRune !== undefined && firstPropRune !== '-') ) {
+        extraDmg += getBonusDamageFromSpecificRune(firstPropRune, crit);
+    }
+
+    if(enchantingBonus >= 2 && (secondPropRune !== undefined && secondPropRune !== '-') ) {
+        extraDmg += getBonusDamageFromSpecificRune(secondPropRune, crit);
+    }
+
+    if(enchantingBonus >= 3 && (thirdPropRune !== undefined && thirdPropRune !== '-') ) {
+        extraDmg += getBonusDamageFromSpecificRune(thirdPropRune, crit);
+    }
+
+    return extraDmg;
+}
+
+export const getAvgDmg = (currentPCState: PCState, crit:boolean, level:number, lastAttack?: boolean, attack?: number, 
+    firstPropRune?: string, secondPropRune?: string, thirdPropRune?: string) => {
     const classJson = getClassJson(currentPCState.classChoice, currentPCState.classSpec);
     const numberOfDice = currentPCState.applyStrikingRunes ? Bonuses['EnchantingBonuses'].striking[level] + 1 : 1;
     let dmgFromAbility = getAbilityBonus(level, getDamageStat(currentPCState.weaponTraits.finesse, currentPCState.canUseDexForDmg, currentPCState.stats.dexterity, currentPCState.stats.strength));
@@ -136,8 +169,10 @@ export const getAvgDmg = (currentPCState: PCState, crit:boolean, level:number, l
             dmg += (parseInt(currentPCState.weaponDices.deadlyDiceSize)/2 + 0.5) * deadlyProgression;
         }
 
+        dmg += getExtraDamageFromPropertyRunes(level, crit, firstPropRune, secondPropRune, thirdPropRune);
         return dmg;
     } else {
+        bonusDmg += getExtraDamageFromPropertyRunes(level, crit, firstPropRune, secondPropRune, thirdPropRune);
         return (parseInt(currentPCState.weaponDices.diceSize)/2 + 0.5) * numberOfDice + bonusDmg;
     }
 }
@@ -149,7 +184,7 @@ interface AttackChance {
     criticalFailureChance: number;
 }
 
-export const getAttackChances = (currentPCState: PCState, attack: number, level:number, enemyAcMod: number) => {
+export const getAttackChances = (currentPCState: PCState, attack: number, level:number, enemyAcMod: number, acJson: any[]) => {
     const classJson = getClassJson(currentPCState.classChoice, currentPCState.classSpec);
     let criticalHitChance: number = 0;
     let hitChance: number = 0;
@@ -178,7 +213,7 @@ export const getAttackChances = (currentPCState: PCState, attack: number, level:
         }
     }
 
-    const enemyAC = EnemyAC['ac'][level] + enemyAcMod;
+    const enemyAC = acJson[level] + enemyAcMod;
     const difference:number = totalHitChance - enemyAC;
 
     for(let diceResult = 1; diceResult <= 20; diceResult++) {

@@ -132,3 +132,11 @@ label {
     font-style: italic;
     font-size: 14px;
 }
+
+.enemyACdropdownContainer {
+    margin-right: 10px;
+}
+
+.propertyRuneSelect {
+    font-size: 10px;
+}

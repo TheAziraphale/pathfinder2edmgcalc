@@ -2,15 +2,15 @@ import React from 'react';
 import Paper from '@material-ui/core/Paper';
 import './Components.css';
 import { Line } from "react-chartjs-2";
-import EnemyAC from '../jsons/EnemyAC.json';
 
 interface Props {
     data?: any[];
     enemyAcMod?: string;
+    acJson:any[];
 }
 
 const DMGGraph = (props: Props) => {
-    const { data, enemyAcMod } = props;
+    const { data, enemyAcMod, acJson } = props;
     const styledData = {
         labels: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', 
                  '11', '12', '13', '14', '15', '16', '17', '18', '19', '20'],
@@ -40,8 +40,8 @@ const DMGGraph = (props: Props) => {
                 */}
                 <p className={'acLabel'} key={'ac'}>{'AC:'}</p>
                 <div className={'rowChildren'}>
-                {EnemyAC['ac'].map((ac, index) => {
-                    if(ac === 0) {
+                {acJson.map((ac, index) => {
+                    if(index === 0 || index >= 21) {
                         return '';
                     }
                     return(<p className={'acText'} key={ac + '_' + index}>{ac + (enemyAcMod !== undefined ? parseInt(enemyAcMod) : 0)}</p>)
