@@ -19,6 +19,7 @@ const EnemyACMod = (props: Props) => {
     useEffect(() => {
         if (enemyAcString === 'averageAC') {
             setACJson(EnemyAC[enemyAcString]);
+            setStandardACMod('moderate');
         } else {
             setACJson(EnemyAC[enemyAcString][standardACMod]);
         }
