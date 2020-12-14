@@ -21,7 +21,7 @@ const AttacksChoice = (props: Props) => {
     useEffect(() => {
         let hide = false;
         if(alwaysMaxMap || ignoreMap) {
-            if (!haveOffHand || attackSelections.length === 1) {
+            if (!haveOffHand || (!haveOffHand && attackSelections.length === 1)) {
                 hide = true;
             }
         }
