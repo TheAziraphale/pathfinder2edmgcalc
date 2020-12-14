@@ -26,6 +26,10 @@
     height: 60px;
 }
 
+.oneSixthElement {
+    width: 60px;
+}
+
 .oneThirdElement {
     width: 125px;
     height: 60px;
@@ -112,4 +116,15 @@
     line-height: 22px;
     font-family: Arial, sans-serif;
     padding-left: 3px;
+  }
+
+  .addbutton {
+      height: 18px;
+  }
+
+  .buttonContainer {
+    width: 18px;
+    height: 18px;
+    padding: 3px;
+    border-radius: 10px;
   }

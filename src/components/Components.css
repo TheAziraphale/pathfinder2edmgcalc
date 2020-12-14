@@ -43,6 +43,10 @@
     display: inline;
 }
 
+.numberListLabel {
+    margin: 0px;
+}
+
 .inputNumber {
     width: 45px;
 }
@@ -60,6 +64,13 @@
     display: flex;
     flex-direction: 'row';
     margin-top: 5px;
+}
+
+.attackChoiceContainer {
+    display: flex;
+    flex-direction: 'row';
+    margin-top: 5px;
+    margin-bottom: 10px;
 }
 
 .buttonCheckboxWrapper{

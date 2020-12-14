@@ -3,6 +3,8 @@ import ClassChoices from '../jsons/ClassChoices.json';
 import Bonuses from '../jsons/Bonuses.json';
 import PropertyRunes from '../jsons/PropertyRunes.json';
 import { PCState } from './PCClass';
+import { Weapon } from './WeaponState';
+import { AttackSelection } from './AttacksChoice';
 
 export const getTotalHitBonus = (level: number, 
         classChoice: string, 
@@ -91,14 +93,13 @@ const getExtraDamageFromPropertyRunes = (level:number, crit:boolean, firstPropRu
     return extraDmg;
 }
 
-export const getAvgDmg = (currentPCState: PCState, crit:boolean, level:number, lastAttack?: boolean, attack?: number, 
-    firstPropRune?: string, secondPropRune?: string, thirdPropRune?: string) => {
+export const getAvgDmg = (currentPCState: PCState, weapon: Weapon, crit:boolean, level:number, lastAttack?: boolean, attack?: number) => {
     const classJson = getClassJson(currentPCState.classChoice, currentPCState.classSpec);
-    const numberOfDice = currentPCState.applyStrikingRunes ? Bonuses['EnchantingBonuses'].striking[level] + 1 : 1;
-    let dmgFromAbility = getAbilityBonus(level, getDamageStat(currentPCState.weaponTraits.finesse, currentPCState.canUseDexForDmg, currentPCState.stats.dexterity, currentPCState.stats.strength));
+    const numberOfDice = weapon.runes.striking ? Bonuses['EnchantingBonuses'].striking[level] + 1 : 1;
+    let dmgFromAbility = getAbilityBonus(level, getDamageStat(weapon.traits.finesse, currentPCState.canUseDexForDmg, currentPCState.stats.dexterity, currentPCState.stats.strength));
 
-    if (currentPCState.weaponType === 'Ranged') {
-        dmgFromAbility = currentPCState.rangedDmgBonus === 'propulsive' ?  Math.floor(dmgFromAbility/2) : currentPCState.rangedDmgBonus === 'thrown' ? dmgFromAbility : 0;
+    if (weapon.type === 'Ranged') {
+        dmgFromAbility = weapon.rangedDmgBonus === 'propulsive' ?  Math.floor(dmgFromAbility/2) : weapon.rangedDmgBonus === 'thrown' ? dmgFromAbility : 0;
     }
 
     let bonusDmg = classJson.dmg[level] + dmgFromAbility;
@@ -123,18 +124,18 @@ export const getAvgDmg = (currentPCState: PCState, crit:boolean, level:number, l
         bonusDmg += classJson.precisionDiceAmount[level] * (InvestigatorPrecisionDiceSize/2 + 0.5 );
     }
 
-    if (currentPCState.weaponTraits.twin && attack !== 1) {
+    if (weapon.traits.twin && attack !== 1) {
         bonusDmg += numberOfDice;
     }
 
-    if (currentPCState.weaponTraits.backstabber) {
+    if (weapon.traits.backstabber) {
         bonusDmg ++;
-        if (currentPCState.applyPlusHitRunes && Bonuses['EnchantingBonuses'].hitBonus[level] >= 3) {
+        if (weapon.runes.hit && Bonuses['EnchantingBonuses'].hitBonus[level] >= 3) {
             bonusDmg++;
         }
     }
 
-    if (currentPCState.weaponTraits.forceful) {
+    if (weapon.traits.forceful) {
         if(attack === 2) {
             bonusDmg += numberOfDice;
         } else if (attack > 2) {
@@ -157,23 +158,23 @@ export const getAvgDmg = (currentPCState: PCState, crit:boolean, level:number, l
     const deadlyProgression = Bonuses['DeadlyProgression'].diceAmount[level];
   
     if (crit) {
-        let dmg = ((currentPCState.weaponDices.fatalDiceSize === '-' ? 
-        parseInt(currentPCState.weaponDices.diceSize)/2 + 0.5 : 
-        parseInt(currentPCState.weaponDices.fatalDiceSize)/2 + 0.5) * numberOfDice + bonusDmg) * 2;
+        let dmg = ((weapon.dices.fatalDiceSize === '-' ? 
+        parseInt(weapon.dices.diceSize)/2 + 0.5 : 
+        parseInt(weapon.dices.fatalDiceSize)/2 + 0.5) * numberOfDice + bonusDmg) * 2;
 
-        if(currentPCState.weaponDices.fatalDiceSize !== '-') {
-            dmg += parseInt(currentPCState.weaponDices.fatalDiceSize)/2 + 0.5;
+        if(weapon.dices.fatalDiceSize !== '-') {
+            dmg += parseInt(weapon.dices.fatalDiceSize)/2 + 0.5;
         }
 
-        if(currentPCState.weaponDices.deadlyDiceSize !== '-') {
-            dmg += (parseInt(currentPCState.weaponDices.deadlyDiceSize)/2 + 0.5) * deadlyProgression;
+        if(weapon.dices.deadlyDiceSize !== '-') {
+            dmg += (parseInt(weapon.dices.deadlyDiceSize)/2 + 0.5) * deadlyProgression;
         }
 
-        dmg += getExtraDamageFromPropertyRunes(level, crit, firstPropRune, secondPropRune, thirdPropRune);
+        dmg += getExtraDamageFromPropertyRunes(level, crit, weapon.runes.firstPropRune, weapon.runes.secondPropRune, weapon.runes.thirdPropRune);
         return dmg;
     } else {
-        bonusDmg += getExtraDamageFromPropertyRunes(level, crit, firstPropRune, secondPropRune, thirdPropRune);
-        return (parseInt(currentPCState.weaponDices.diceSize)/2 + 0.5) * numberOfDice + bonusDmg;
+        bonusDmg += getExtraDamageFromPropertyRunes(level, crit, weapon.runes.firstPropRune, weapon.runes.secondPropRune, weapon.runes.thirdPropRune);
+        return (parseInt(weapon.dices.diceSize)/2 + 0.5) * numberOfDice + bonusDmg;
     }
 }
 
@@ -184,32 +185,32 @@ interface AttackChance {
     criticalFailureChance: number;
 }
 
-export const getAttackChances = (currentPCState: PCState, attack: number, level:number, enemyAcMod: number, acJson: any[]) => {
+export const getAttackChances = (currentPCState: PCState, weapon: Weapon, attackSelection: AttackSelection, attack: number, level:number, enemyAcMod: number, acJson: any[]) => {
     const classJson = getClassJson(currentPCState.classChoice, currentPCState.classSpec);
     let criticalHitChance: number = 0;
     let hitChance: number = 0;
     let missChance: number = 0;
     let criticalFailureChance: number = 0;
 
-    let hitAbilityBonus = getAbilityBonus(level, getHitStat(currentPCState.weaponTraits.finesse, currentPCState.stats.dexterity, currentPCState.stats.strength, currentPCState.weaponType));
+    let hitAbilityBonus = getAbilityBonus(level, getHitStat(weapon.traits.finesse, currentPCState.stats.dexterity, currentPCState.stats.strength, weapon.type));
     if ((attack === 1 && currentPCState.classChoice === 'investigator') && currentPCState.deviseAStratagem) {
         hitAbilityBonus = getAbilityBonus(level, currentPCState.stats.intelligence);
     }
-    let totalHitChance = getTotalHitBonus(level, currentPCState.classChoice, currentPCState.classSpec, currentPCState.applyPlusHitRunes, currentPCState.hitBonus, hitAbilityBonus);
+    let totalHitChance = getTotalHitBonus(level, currentPCState.classChoice, currentPCState.classSpec, weapon.runes.hit, currentPCState.hitBonus, hitAbilityBonus);
 
-    if (!currentPCState.ignoreMAP) {
-        if (attack === 2 && !currentPCState.startAtMaxMAP) {
-            const secondAttackMod = (currentPCState.classChoice === 'ranger' && currentPCState.classSpec === 'flurry' && currentPCState.markedTarget ? 
-            classJson.flurrySecondAttack[level]
-            : -5) + (currentPCState.weaponTraits.agile ? 1 : 0);
-
-            totalHitChance += secondAttackMod;
-        } else if (attack > 2 || currentPCState.startAtMaxMAP) {
+    if(!currentPCState.ignoreMAP) {
+        if (currentPCState.startAtMaxMAP || attackSelection.map === '3') {
             const thirdAttackMod = (currentPCState.classChoice === 'ranger' && currentPCState.classSpec === 'flurry' && currentPCState.markedTarget ? 
             classJson.flurryThirdAttack[level]
-            : -10) + (currentPCState.weaponTraits.agile ? 2 : 0);
+            : -10) + (weapon.traits.agile ? 2 : 0);
 
             totalHitChance += thirdAttackMod;
+        } else if (attackSelection.map === '2') {
+            const secondAttackMod = (currentPCState.classChoice === 'ranger' && currentPCState.classSpec === 'flurry' && currentPCState.markedTarget ? 
+            classJson.flurrySecondAttack[level]
+            : -5) + (weapon.traits.agile ? 1 : 0);
+
+            totalHitChance += secondAttackMod;
         }
     }
 
@@ -225,7 +226,7 @@ export const getAttackChances = (currentPCState: PCState, attack: number, level:
                 criticalHitChance += 5;
             }
         } else if (difference + diceResult >= 0) {
-            if (diceResult >= currentPCState.critRange) {
+            if (diceResult >= weapon.critRange) {
                 criticalHitChance += 5;
             } if (diceResult === 1) {
                 missChance += 5;
@@ -234,7 +235,7 @@ export const getAttackChances = (currentPCState: PCState, attack: number, level:
                 hitChance += 5;
             }
         } else if (difference + diceResult >= -10) {
-            if (diceResult >= currentPCState.critRange) {
+            if (diceResult >= weapon.critRange) {
                 hitChance += 5;
             } if (diceResult === 1) {
                 criticalFailureChance += 5;
@@ -243,7 +244,7 @@ export const getAttackChances = (currentPCState: PCState, attack: number, level:
                 missChance += 5;
             }
         } else {
-            if (diceResult >= currentPCState.critRange) {
+            if (diceResult >= weapon.critRange) {
                 missChance += 5;
             }
             else {

@@ -3,11 +3,12 @@ import './Components.css';
 
 interface Props {
     setPropertyRune: (diceValue: string) => void;
+    property: string;
     name?: string;
 }
 
 const PropertyRuneChoice = (props: Props) => {
-    const { name, setPropertyRune } = props;
+    const { name, setPropertyRune, property } = props;
 
     return (
         <div className={'inputContainer'}>
@@ -16,7 +17,7 @@ const PropertyRuneChoice = (props: Props) => {
                     <p className={'labelName'}>{name}</p>
                 </div>
             )}
-            <select defaultValue={'-'} className={'propertyRuneSelect'} onChange={(event) => { 
+            <select defaultValue={property} className={'propertyRuneSelect'} onChange={(event) => { 
                 setPropertyRune(event.target.value)
             }}>
                 <option> {'-'} </option>

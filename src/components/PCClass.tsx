@@ -1,15 +1,15 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import 'rc-color-picker/assets/index.css';
 import ClassChoice, { SpecChoice } from './ClassChoice';
-import { Paper } from '@material-ui/core';
+import { Button, Paper } from '@material-ui/core';
 import './PCClass.css';
 import NumberInput from './NumberInput';
-import DiceChoice from './DiceChoice';
 import CheckboxButtonInput from './CheckboxButtonInput';
 import { getClassJson, getAvgDmg } from './HelpFunctions';
 import { getAttackChances } from './HelpFunctions';
+import AttackChoices, { AttackSelection } from './AttacksChoice';
 import { HuePicker   } from 'react-color';
-import PropertyRuneChoice from './PropertyRuneChoice';
+import WeaponState, { Weapon, WeaponDices, WeaponRunes, WeaponTraits } from './WeaponState';
 
 interface Props {
     id: string;
@@ -25,31 +25,12 @@ interface Stats {
     intelligence: number;
 }
 
-interface WeaponDices {
-    diceSize: string;
-    deadlyDiceSize: string;
-    fatalDiceSize: string;
-}
-
-interface WeaponTraits {
-    agile: boolean;
-    backstabber: boolean;
-    finesse: boolean;
-    forceful: boolean;
-    twin: boolean;
-}
-
 export interface PCState {
     classChoice: string;
     classSpec: string;
     stats: Stats;
-    weaponDices: WeaponDices;
-    weaponTraits: WeaponTraits;
-    critRange:number;
-    weaponType: string;
-    rangedDmgBonus: string;
-    applyPlusHitRunes: boolean;
-    applyStrikingRunes: boolean;
+    mainHand: Weapon;
+    offHand?: Weapon;
     startAtMaxMAP: boolean;
     ignoreMAP: boolean;
     hitBonus: number;
@@ -64,6 +45,7 @@ export interface PCState {
     attackOfOpportunity: boolean;
     lastAttackWithFinisher: boolean;
     amountOfAttacks: number;
+    attackSelections: AttackSelection[];
 }
 
 const SwashbucklerFinisherDmgDice = 6;
@@ -71,31 +53,16 @@ const SwashbucklerFinisherDmgDice = 6;
 const PCClass = (props: Props) => {
     const { id, color, setGraphData, enemyAcMod, acJson } = props;
     const [currentPCState, setCurrentPCState] = useState<PCState>();
+    const [update, forceUpdate] = React.useState({});
     const [classChoice, setClassChoice] = useState<string>('-');
     const [classSpec, setClassSpec] = useState<string>('-');
-    const [diceSize, setDiceSize] = useState<string>('4');
-    const [deadlyDiceSize, setDeadlyDiceSize] = useState<string>('-');
-    const [fatalDiceSize, setFatalDiceSize] = useState<string>('-');
-    const [weaponType, setWeaponType] = useState<string>('Melee');
-    const [rangedDmgBonus, setRangedDmgBonus] = useState<string>('-');
     const [strength, setStrength] = useState<number>(18);
     const [dexterity, setDexterity] = useState<number>(18);
     const [intelligence, setIntelligence] = useState<number>(18);
-    const [critRange, setCritRange] = useState<number>(20);
     const [amountOfAttacks, setAmountOfAttacks] = useState<number>(1);
     const [hitBonus, setHitBonus] = useState<number>(0);
     const [dmgBonus, setDmgBonus] = useState<number>(0);
     const [canUseDexForDmg, setCanUseDexForDmg] = useState<boolean>(false);
-    const [agile, setAgile] = useState<boolean>(false);
-    const [backstabber, setBackstabber] = useState<boolean>(false);
-    const [finesse, setFinesse] = useState<boolean>(false);
-    const [forceful, setForceful] = useState<boolean>(false);
-    const [twin, setTwin] = useState<boolean>(false);
-    const [applyPlusHitRunes, setApplyPlusHitRunes] = useState<boolean>(true);
-    const [applyStrikingRunes, setApplyStrikingRunes] = useState<boolean>(true);
-    const [firstPropRune, setFirstPropRune] = useState<string>('-');
-    const [secondPropRune, setSecondPropRune] = useState<string>('-');
-    const [thirdPropRune, setThirdPropRune] = useState<string>('-');
     const [startAtMaxMAP, setStartAtMaxMAP] = useState<boolean>(false);
     const [ignoreMAP, setIgnoreMAP] = useState<boolean>(false);
     const [applySneakDmg, setApplySneakDmg] = useState<boolean>(false);
@@ -108,36 +75,66 @@ const PCClass = (props: Props) => {
     const [lastAttackWithFinisher, setLastAttackWithFinisher] = useState<boolean>(false);
     const [currentColor, setCurrentColor] = useState<string>(color);
     const [showHuePicker, setShowHuePicker] = useState<boolean>(false);
-    
-    useEffect(() => {
+
+    const createBaseWeapon = () => {
         const weaponDices: WeaponDices = {
-            diceSize, 
-            deadlyDiceSize, 
-            fatalDiceSize
+            diceSize: '4',
+            deadlyDiceSize: '-',
+            fatalDiceSize: '-'
         };
+        const weaponTraits: WeaponTraits = {
+            agile: false, 
+            backstabber: false,
+            finesse: false,
+            forceful: false,
+            twin: false
+        };
+        const weaponRunes: WeaponRunes = {   
+            hit: true,
+            striking: true,
+            firstPropRune: '-',
+            secondPropRune: '-',
+            thirdPropRune: '-'
+        }
+        const weapon: Weapon = {
+            dices: weaponDices,
+            traits: weaponTraits,
+            runes: weaponRunes,
+            type: 'Melee',
+            rangedDmgBonus: '-',
+            critRange: 20
+        };
+
+        return weapon;
+    }
+
+    const createBaseAttackSelection = (attack: number) => {
+        return {hand: 'main', map: attack === 1 ? '1' : attack === 2 ? '2' : '3' };
+    }
+
+    const [mainHand, setMainHand] = useState<Weapon>(createBaseWeapon());
+    const [offHand, setOffHand] = useState<Weapon>(undefined);
+    const [attackSelections, setAttackSelections] = useState<AttackSelection[]>([createBaseAttackSelection(1)]);
+
+    useEffect(() => {
         const stats: Stats = {
             strength,
             dexterity,
             intelligence
         };
-        const weaponTraits: WeaponTraits = {
-            agile, 
-            backstabber,
-            finesse,
-            forceful,
-            twin
-        };
+        if (!offHand) {
+            let newAttackSelections = attackSelections;
+            newAttackSelections.forEach((selection) => {
+                selection.hand = 'main';
+            })
+            setAttackSelections(newAttackSelections);
+        }
         setCurrentPCState({
             classChoice, 
             classSpec,
             stats: stats,
-            weaponDices: weaponDices,
-            weaponTraits: weaponTraits,
-            critRange,
-            weaponType,
-            rangedDmgBonus,
-            applyPlusHitRunes,
-            applyStrikingRunes,
+            mainHand: mainHand,
+            offHand: offHand,
             startAtMaxMAP,
             ignoreMAP,
             hitBonus,
@@ -152,12 +149,12 @@ const PCClass = (props: Props) => {
             attackOfOpportunity,
             lastAttackWithFinisher,
             amountOfAttacks,
+            attackSelections,
         })
     }, [
-        classChoice, classSpec, strength, dexterity, intelligence, diceSize, deadlyDiceSize, fatalDiceSize, agile, backstabber, finesse, forceful, 
-        twin, critRange, weaponType, rangedDmgBonus, applyPlusHitRunes, applyStrikingRunes, startAtMaxMAP, ignoreMAP, hitBonus,  dmgBonus, 
-        canUseDexForDmg, applySneakDmg,  applyPanache,  markedTarget, rage,  deviseAStratagem, retributiveStrike, attackOfOpportunity, lastAttackWithFinisher, amountOfAttacks, 
-        enemyAcMod, acJson, currentColor, firstPropRune, secondPropRune, thirdPropRune
+        classChoice, classSpec, strength, dexterity, intelligence, mainHand, offHand, startAtMaxMAP, ignoreMAP, hitBonus,  dmgBonus, 
+        canUseDexForDmg, applySneakDmg, applyPanache,  markedTarget, rage,  deviseAStratagem, retributiveStrike, attackOfOpportunity, 
+        lastAttackWithFinisher, amountOfAttacks, enemyAcMod, acJson, currentColor, attackSelections, update
     ])
 
     const doesClassHaveASpec = useCallback(() => {
@@ -182,28 +179,36 @@ const PCClass = (props: Props) => {
         setDexterity(18);
         setIntelligence(18);
         setCanUseDexForDmg(false);
-        setDiceSize('4');
-        setDeadlyDiceSize('-');
-        setFatalDiceSize('-');
-        setAgile(false);
-        setBackstabber(false);
-        setFinesse(false);
-        setForceful(false);
-        setTwin(false);
-        setCritRange(20);
-        setWeaponType('Melee');
-        setRangedDmgBonus('-');
-        setApplyPlusHitRunes(true);
-        setApplyStrikingRunes(true);
+        setMainHand(createBaseWeapon());
         setStartAtMaxMAP(false);
         setIgnoreMAP(false);
         setHitBonus(0);
         setDmgBonus(0);
         setAmountOfAttacks(1);
-        setFirstPropRune('-');
-        setSecondPropRune('-');
-        setThirdPropRune('-');
+        setAttackSelections([createBaseAttackSelection(1)]);
     }, [classChoice]);
+
+    useEffect(() => {
+        if(attackSelections.length !== amountOfAttacks) {
+            let newAttackSelections = attackSelections;
+            if(attackSelections.length > amountOfAttacks) {
+                for(let attacks = amountOfAttacks; attacks < attackSelections.length; attacks++) {
+                    newAttackSelections.pop();
+                    if (newAttackSelections.length === 1) {
+                        newAttackSelections[0].hand = 'main';
+                    }
+                }
+            } else if(attackSelections.length < amountOfAttacks) {
+                for(let selLength = attackSelections.length; selLength < amountOfAttacks; selLength++) {
+                    newAttackSelections.push(createBaseAttackSelection(selLength + 1));
+                }
+            }
+            setAttackSelections(newAttackSelections);
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [amountOfAttacks, attackSelections]);
+
+    
 
     useEffect(() => {
         if(currentPCState === undefined || currentPCState.classChoice === '-' || (doesClassHaveASpec() && currentPCState.classSpec === '-')) {
@@ -226,13 +231,13 @@ const PCClass = (props: Props) => {
         while(level < 21) {
             let totalAmountOfDmg = 0;
             for(let attack = 1; attack <= amountOfAttacks; attack++) {
-                if (attack === 1 && classChoice === 'champion' && retributiveStrike) {
-                    console.log("before:", totalAmountOfDmg);
-                }
-                const attackChances = getAttackChances(currentPCState, attack, level, parseInt(enemyAcMod), acJson);
+                let attackSelection = attackSelections[attack - 1];
+                let weaponToAttackWith = attackSelections[attack - 1].hand === 'main' ? mainHand : offHand;
+
+                const attackChances = getAttackChances(currentPCState, weaponToAttackWith, attackSelection, attack, level, parseInt(enemyAcMod), acJson);
                 const lastAttack = attack === amountOfAttacks;
-                totalAmountOfDmg += (attackChances.hitChance / 100) * getAvgDmg(currentPCState, false, level, lastAttack, attack, firstPropRune, secondPropRune, thirdPropRune);
-                totalAmountOfDmg += (attackChances.criticalHitChance / 100) * getAvgDmg(currentPCState, true, level, lastAttack, attack, firstPropRune, secondPropRune, thirdPropRune);
+                totalAmountOfDmg += (attackChances.hitChance / 100) * getAvgDmg(currentPCState, weaponToAttackWith, false, level, lastAttack, attack);
+                totalAmountOfDmg += (attackChances.criticalHitChance / 100) * getAvgDmg(currentPCState, weaponToAttackWith, true, level, lastAttack, attack);
 
                 if (attack === 1 && ((classChoice === 'champion' && retributiveStrike) || (classChoice === 'fighter' && attackOfOpportunity))) {
                     /* Symbolizes a free extra attack with reaction */
@@ -385,97 +390,24 @@ const PCClass = (props: Props) => {
                                 }
                             </div>
                         </div>
-                        <div className={'labelElement'}>
-                            <p className={'labelHeader'}>Weapon</p>   
-                        </div>
-                        <div className={'elementWrapper'}>
-                            <div className={'elementContainer'}>
-                                <div className={'quarterElement'} >
-                                    <p className={'label'}>Dice size</p>                
-                                    <DiceChoice startDiceValue={'4'} allowNoInput={false} setDiceValue={setDiceSize} /> 
-                                </div>
-                                <div className={'quarterElement'} >
-                                    <p className={'label'}>Deadly?</p>                
-                                    <DiceChoice startDiceValue={'-'} allowNoInput={true} setDiceValue={setDeadlyDiceSize} />
-                                </div>
-                                <div className={'quarterElement'} >
-                                    <p className={'label'}>Fatal?</p>                
-                                    <DiceChoice startDiceValue={'-'} allowNoInput={true} setDiceValue={setFatalDiceSize} />
-                                </div>
-                                <div className={'quarterElement'} >
-                                    <p className={'label'}>Crit range</p>                
-                                    <NumberInput min={2} max={20} value={critRange} setValue={setCritRange} />
-                            </div>
-                            </div>
-                            <div className={'elementContainer'}>
-                                <div className={'twoFifthElement'} >
-                                    <p className={'label'}>Weapon type </p>   
-                                    <select onChange={(event) => {
-                                        setWeaponType(event.target.value);
-                                    }}>
-                                        <option key={'melee'} value={'Melee'}>Melee</option>
-                                        <option key={'ranged'} value={'Ranged'}>Ranged</option>
-                                    </select>
-                                </div>
-                                {weaponType === 'Melee' && (
-                                    <div className={'twoThirdElement'}>
-                                        <p className={'label'}>Traits</p>   
-                                        <div className={'buttonCheckboxWrapper'}>
-                                            <CheckboxButtonInput value={currentPCState.weaponTraits.agile} setValue={setAgile} label={'Agile'} id={'checkbox_agile' + id} /> 
-                                            <CheckboxButtonInput value={currentPCState.weaponTraits.backstabber} setValue={setBackstabber} label={'Backstabber'} id={'checkbox_backstabber' + id} /> 
-                                            <CheckboxButtonInput value={currentPCState.weaponTraits.finesse} setValue={setFinesse} label={'Finesse'} id={'checkbox_finesse' + id} /> 
-                                            <CheckboxButtonInput value={currentPCState.weaponTraits.forceful} setValue={setForceful} label={'Forceful'} id={'checkbox_forceful' + id} /> 
-                                            <CheckboxButtonInput value={currentPCState.weaponTraits.twin} setValue={setTwin} label={'Twin'} id={'checkbox_twin' + id} /> 
-                                        </div>
+                        <WeaponState weapon={mainHand} label={offHand === undefined ? 'Weapon' : 'Main hand'} setWeapon={setMainHand} pcId={id + '_mainHand'} />
+                        {offHand !== undefined ? (
+                            <WeaponState buttonCommand={() => { setOffHand(undefined) }} weapon={offHand} label={'Off hand'} setWeapon={setOffHand} pcId={id + '_offHand'} />
+                        ) : (
+                            <div className={'labelElement'}>
+                                <div className={'elementContainer'} style={{height: 30}}>
+                                    <p className={'labelHeader'}>Add second Weapon</p>
+                                    <div className={'buttonContainer'}>
+                                        <Button style={{minWidth: 0, padding: 0, paddingLeft: 1,  borderRadius: 10, fontSize:20,
+                                        color: 'white', 
+                                        paddingBottom: (offHand === undefined ? 0 : 3),  
+                                        backgroundColor: (offHand === undefined ? 'rgb(25, 180, 25)' : 'rgb(255, 50, 50)')}} 
+                                            fullWidth={true} className={'addbutton'} variant="contained" onClick={() => { setOffHand(createBaseWeapon())}}>{(offHand === undefined ? '+' : '-')}</Button>
                                     </div>
-                                )}
-                                {weaponType === 'Ranged' && (
-                                    <div className={'twoThirdElement'}>
-                                        <p className={'label'}>Damage bonus</p>   
-                                        <select onChange={(event) => { 
-                                            setRangedDmgBonus(event.target.value)
-                                        }}>
-                                            <option key={"-"} value={'-'}>
-                                                { "None"}
-                                            </option>
-                                            <option key={"propulsive"} value={'propulsive'}>
-                                                { "Propulsive"}
-                                            </option>
-                                            <option key={"thrown"} value={'thrown'}>
-                                                { "Thrown" }
-                                            </option>
-                                        </select>
-                                    </div>
-                                )}
-                            </div>
-                            <div className={'elementContainer'} style={{height: 50}}>
-                                <div className={'fullElement'} >
-                                    <p className={'label'}>Fundamental runes </p>  
-                                        <div className={'buttonCheckboxWrapper'}>
-                                            <div style={{marginRight: 5}}>
-                                                <CheckboxButtonInput value={currentPCState.applyPlusHitRunes} setValue={setApplyPlusHitRunes} label={'Hit runes (+1, +2, +3)'} id={'checkbox_hit_runes' + id} /> 
-                                            </div>
-                                            <div>
-                                                <CheckboxButtonInput value={currentPCState.applyStrikingRunes} setValue={setApplyStrikingRunes} label={'Striking runes'} id={'checkbox_striking_runes' + id} /> 
-                                            </div>
-                                        </div>
                                 </div>
                             </div>
-                            <div className={'elementContainer'} style={{height: 50}}>
-                                <div className={'oneThirdElement'} >
-                                    <p className={'label'}>1# Prop. rune</p>  
-                                    <PropertyRuneChoice setPropertyRune={setFirstPropRune} />
-                                </div>
-                                <div className={'oneThirdElement'} >
-                                    <p className={'label'}>2# Prop. rune</p>  
-                                    <PropertyRuneChoice setPropertyRune={setSecondPropRune} />
-                                </div>
-                                <div className={'oneThirdElement'} >
-                                    <p className={'label'}>3# Prop. rune</p>  
-                                    <PropertyRuneChoice setPropertyRune={setThirdPropRune} />
-                                </div>
-                            </div>
-                        </div>
+                        )
+                        }
                         <div className={'labelElement'}>
                             <p className={'labelHeader'}>Attacks and extra</p>   
                         </div>
@@ -494,6 +426,10 @@ const PCClass = (props: Props) => {
                                     <NumberInput min={-20} max={20} value={currentPCState.dmgBonus} setValue={setDmgBonus} /> 
                                  </div>
                             </div>
+                            <AttackChoices setAttackSelections={(value: AttackSelection[]) => {
+                                setAttackSelections(value);
+                                forceUpdate({});
+                            }}  haveOffHand={offHand !== undefined} attackSelections={attackSelections} ignoreMap={ignoreMAP} alwaysMaxMap={startAtMaxMAP} />
                             <div className={'elementContainer'} style={{height: 25}}>
                                 <div style={{marginRight: 5}}>
                                 <CheckboxButtonInput value={currentPCState.startAtMaxMAP} setValue={(val:boolean) => {
