@@ -26,8 +26,16 @@
     height: 60px;
 }
 
+.oneFifthElement {
+    width: 80px;
+}
+
 .oneSixthElement {
     width: 60px;
+}
+
+.oneEightElement {
+    width: 45px;
 }
 
 .oneThirdElement {

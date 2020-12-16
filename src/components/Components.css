@@ -12,10 +12,14 @@
     width: 840px;
     margin: 20px;
     margin-bottom: 0px;
-    pointer-events: none;
 }
 
-.rowChildren {
+.flexRow {
+    display: flex;
+    flex-direction: row;
+}
+
+.graphRowChildren {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
@@ -45,6 +49,7 @@
 
 .numberListLabel {
     margin: 0px;
+    margin-top: 1px;
 }
 
 .inputNumber {
@@ -101,6 +106,21 @@ label {
     position: absolute;
     left: -100vw;
     /* Note, you may want to position the checkbox over top the label and set the opacity to zero instead. It can be better for accessibilty on some touch devices for discoverability. */
+}
+
+.mapLabel {
+    height: 18px;
+    margin-left: 5px;
+    font-style: italic;
+    font-size: 14px;
+}
+
+.labelSmall {
+    font-size: 14px;
+}
+
+.attackChoiceSelect {
+    margin-top: 3px;
 }
 
 .noselect {

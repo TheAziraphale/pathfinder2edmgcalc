@@ -5,7 +5,20 @@ import { Button, Paper } from '@material-ui/core';
 import './PCClass.css';
 import NumberInput from './NumberInput';
 import CheckboxButtonInput from './CheckboxButtonInput';
-import { getClassJson, getAvgDmg } from './HelpFunctions';
+import { 
+    getClassJson, 
+    getAvgDmg, 
+    AttackChance, 
+    getDmgFromAbility, 
+    getClassDmg, 
+    getClassBonusDmg, 
+    getDmgFromWeaponTraits, 
+    getExtraDamageFromPropertyRunes,
+    getMAP,
+    getTotalHitBonus,
+    getAbilityBonus,
+    getHitStat,
+} from './HelpFunctions';
 import { getAttackChances } from './HelpFunctions';
 import AttackChoices, { AttackSelection } from './AttacksChoice';
 import { HuePicker   } from 'react-color';
@@ -23,6 +36,23 @@ interface Stats {
     strength: number;
     dexterity: number;
     intelligence: number;
+}
+
+export interface AttackSummary {
+    weapon: Weapon;
+    attackSelection: AttackSelection;
+    attackChances: AttackChance;
+    totalHit: number;
+    totalDmg: number;
+    extraRuneDmg: number;
+    abilityBonusDmg: number;
+    abilityBonusHit: number;
+    classDmg: number;
+    classHit: number;
+    classBonusDmg: number;
+    weaponTraitBonusDmg: number;
+    untypedBonusDmg: number;
+    avgDmgThisAttack: number;
 }
 
 export interface PCState {
@@ -223,41 +253,97 @@ const PCClass = (props: Props) => {
         return getClassJson(currentPCState.classChoice, currentPCState.classSpec);
     },[currentPCState])
 
+    const getAttackSummary = (attackChances: AttackChance, level: number, weaponToAttackWith: Weapon, attackSelection: AttackSelection, attack: number, lastAttack: boolean, avgDmgThisAttack: number) => {
+        const runeBonusDmg = (attackChances.hitChance / 100) * getExtraDamageFromPropertyRunes(level, false, weaponToAttackWith.runes) + 
+        (attackChances.criticalHitChance / 100) * getExtraDamageFromPropertyRunes(level, true, weaponToAttackWith.runes);
+        
+
+        let hitAbilityBonus = getAbilityBonus(level, getHitStat(weaponToAttackWith.traits.finesse, currentPCState.stats.dexterity, currentPCState.stats.strength, weaponToAttackWith.type));
+        if ((attack === 1 && currentPCState.classChoice === 'investigator') && currentPCState.deviseAStratagem) {
+            hitAbilityBonus = getAbilityBonus(level, currentPCState.stats.intelligence);
+        }
+        let totalHitChance = getTotalHitBonus(level, currentPCState.classChoice, currentPCState.classSpec, weaponToAttackWith.runes.hit, currentPCState.hitBonus, hitAbilityBonus);
+        
+        if(!currentPCState.ignoreMAP) {
+            totalHitChance += getMAP(currentPCState, level, attackSelection);
+        }
+    
+        let extraRuneDmg = runeBonusDmg;
+        let abilityBonusDmg = getDmgFromAbility(currentPCState, weaponToAttackWith, level);
+        let classDmg = getClassDmg(currentPCState, level);
+        let classBonusDmg = getClassBonusDmg(currentPCState, level, lastAttack, attack);
+        let weaponTraitBonusDmg = getDmgFromWeaponTraits(weaponToAttackWith, level, attack);
+        let untypedBonusDmg = currentPCState.dmgBonus;
+
+        return {
+            weapon: weaponToAttackWith,
+            attackSelection: attackSelection,
+            attackChances: attackChances,
+            totalHit: totalHitChance,
+            totalDmg: extraRuneDmg + abilityBonusDmg + classDmg + classBonusDmg + weaponTraitBonusDmg + untypedBonusDmg,
+            extraRuneDmg: runeBonusDmg,
+            abilityBonusDmg: abilityBonusDmg,
+            abilityBonusHit: hitAbilityBonus,
+            classDmg: classDmg,
+            classHit: getClassJson(classChoice, classSpec).hit[level],
+            classBonusDmg: classBonusDmg,
+            weaponTraitBonusDmg: weaponTraitBonusDmg,
+            untypedBonusDmg: untypedBonusDmg,
+            avgDmgThisAttack: avgDmgThisAttack,
+        }
+    }
+
     const getDamageChart = () => {
         let level = 1;
 
         const attackData: any[] = [];
+        const attacksSummary: any[] = [];
 
         while(level < 21) {
             let totalAmountOfDmg = 0;
+            const attackSummary: AttackSummary[] = [];
             for(let attack = 1; attack <= amountOfAttacks; attack++) {
                 let attackSelection = attackSelections[attack - 1];
                 let weaponToAttackWith = attackSelections[attack - 1].hand === 'main' ? mainHand : offHand;
 
                 const attackChances = getAttackChances(currentPCState, weaponToAttackWith, attackSelection, attack, level, parseInt(enemyAcMod), acJson);
                 const lastAttack = attack === amountOfAttacks;
-                totalAmountOfDmg += (attackChances.hitChance / 100) * getAvgDmg(currentPCState, weaponToAttackWith, false, level, lastAttack, attack);
-                totalAmountOfDmg += (attackChances.criticalHitChance / 100) * getAvgDmg(currentPCState, weaponToAttackWith, true, level, lastAttack, attack);
-
+                
+                let thisAttackDmg = (attackChances.hitChance / 100) * getAvgDmg(currentPCState, weaponToAttackWith, false, level, lastAttack, attack);
+                thisAttackDmg += (attackChances.criticalHitChance / 100) * getAvgDmg(currentPCState, weaponToAttackWith, true, level, lastAttack, attack);
+                
+                let reactionExtraDmg = 0;
                 if (attack === 1 && ((classChoice === 'champion' && retributiveStrike) || (classChoice === 'fighter' && attackOfOpportunity))) {
                     /* Symbolizes a free extra attack with reaction */
-                    totalAmountOfDmg *= 2;
+                    reactionExtraDmg = thisAttackDmg;
                 }
+                thisAttackDmg += reactionExtraDmg;
 
+                let swashbucklerFinisherDmg = 0;
                 if (classChoice === 'swashbuckler' && applyPanache && lastAttackWithFinisher && lastAttack) {
-                    totalAmountOfDmg += ((attackChances.missChance / 100) * (SwashbucklerFinisherDmgDice/2 + 0.5) * getClassJsonInternal().panacheBonus[level]) / 2;
+                    swashbucklerFinisherDmg = ((attackChances.missChance / 100) * (SwashbucklerFinisherDmgDice/2 + 0.5) * getClassJsonInternal().panacheBonus[level]) / 2;
                 }
+                thisAttackDmg += swashbucklerFinisherDmg;
+
+                attackSummary.push(getAttackSummary(attackChances, level, weaponToAttackWith, attackSelection, attack, lastAttack, thisAttackDmg))
+                totalAmountOfDmg += thisAttackDmg;
             }
-            
             attackData.push(totalAmountOfDmg);
+            attacksSummary.push(attackSummary);
             level++;
         }
-        return [{
-                label: (parseInt(id) + 1) +'# ' + (classSpec !== '-' ? Capitalize(classSpec) : '') + ' ' + Capitalize(classChoice),
-                data: attackData,
-                fill: false,
-                borderColor: currentColor,
-            }];
+
+        return [ 
+            {
+                datasets: {
+                    label: (parseInt(id) + 1) +'# ' + (classSpec !== '-' ? Capitalize(classSpec) : '') + ' ' + Capitalize(classChoice),
+                    data: attackData,
+                    fill: false,
+                    borderColor: currentColor,
+                }, 
+                attacksSummary: attacksSummary
+            }
+        ];
     };
 
     const Capitalize = (str:string) => {
@@ -429,7 +515,7 @@ const PCClass = (props: Props) => {
                             <AttackChoices setAttackSelections={(value: AttackSelection[]) => {
                                 setAttackSelections(value);
                                 forceUpdate({});
-                            }}  haveOffHand={offHand !== undefined} attackSelections={attackSelections} ignoreMap={ignoreMAP} alwaysMaxMap={startAtMaxMAP} />
+                            }} currentPCState={currentPCState} haveOffHand={offHand !== undefined} attackSelections={attackSelections} ignoreMap={ignoreMAP} alwaysMaxMap={startAtMaxMAP} />
                             <div className={'elementContainer'} style={{height: 25}}>
                                 <div style={{marginRight: 5}}>
                                 <CheckboxButtonInput value={currentPCState.startAtMaxMAP} setValue={(val:boolean) => {

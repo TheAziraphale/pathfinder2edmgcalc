@@ -11,35 +11,79 @@ interface Props {
 
 const DMGGraph = (props: Props) => {
     const { data, enemyAcMod, acJson } = props;
+
+    const datasets = [];
+    const attackssummary = [];
+    data.forEach((instance) => {
+        if (Object.keys(instance).length !== 0) { 
+            datasets.push(instance.datasets);
+            attackssummary.push(instance.attacksSummary);
+        }
+    });
+
     const styledData = {
         labels: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', 
-                 '11', '12', '13', '14', '15', '16', '17', '18', '19', '20'],
-        datasets: data,
-      };
-    
-      /*
-    for (let i = 0; i < 20; i++) {
-        styledData.labels[i] += ' (' + EnemyAC['ac'][i+1] + ')'
-    }
-    */
+                    '11', '12', '13', '14', '15', '16', '17', '18', '19', '20'],
+        datasets: datasets,
+        attackssummary: attackssummary,
+    };
+
+    const options = {
+        legend: {
+            display: true
+        },
+        tooltips: {
+            callbacks: {
+                title: function(tooltipItem, data) {
+                    return (
+                        data.datasets[tooltipItem[0].datasetIndex].label + " - Level " + data.labels[tooltipItem[0].index].toLocaleString("en-US", {
+                            minimumIntegerDigits: 2,
+                            useGrouping: false
+                        })
+                    );
+                },
+                label: function(tooltipItems, data) {
+                    return "Average total Damage: " +  data.datasets[tooltipItems.datasetIndex].data[tooltipItems.index].toFixed(1);
+                },
+                afterBody: function(tooltipItems, data) {
+                    var multistring = ['----------------------------------------'];
+                    data.attackssummary[tooltipItems[0].datasetIndex][tooltipItems[0].index].forEach((attack, index) => {
+                        // console.log(attack);
+                        multistring.push('Attack '+ (index + 1) + ' - Total hit: ' + attack.totalHit.toFixed(0) + 
+                        ' - Bonus dmg: ' + attack.totalDmg.toFixed(1) + ' - Avg dmg: ' + attack.avgDmgThisAttack.toFixed(1));
+                    });
+        
+                    return multistring;
+                }
+            },
+            custom: function(tooltip) {
+                tooltip.zindex = 1000;
+              },
+            xPadding: 20,
+            yPadding: 10,
+            displayColors: false,
+            bodyFontStyle: "bold"
+        },
+        yAxes: [
+            {
+                stacked: true,
+                gridLines: {
+                    display: true,
+                    drawBorder: true
+                },
+                ticks: {
+                    display: false
+                }
+             }
+         ]
+    };
 
     return (
         <div className={'graphContainer'}>
             <Paper>
-                <Line height={360} width={800} data={styledData} />
-                { /*
-                <Chart height={360} width={770} data={data} >
-                    <ArgumentAxis />
-                    <ValueAxis />
-                    <Title text={"Damage per round"}/>
-                    <LineSeries color={'blue'} valueField="first_value" argumentField="first" />
-                    <LineSeries color={'red'}  valueField="second_value" argumentField="second" />
-                    <LineSeries color={'green'}  valueField="third_value" argumentField="third" />
-                    <LineSeries color={'yellow'} valueField="fourth_value" argumentField="fourth" />
-                </Chart>
-                */}
+                <Line height={360} width={800} options={options} data={styledData} />
                 <p className={'acLabel'} key={'ac'}>{'AC:'}</p>
-                <div className={'rowChildren'}>
+                <div className={'graphRowChildren'}>
                 {acJson.map((ac, index) => {
                     if(index === 0 || index >= 21) {
                         return '';
