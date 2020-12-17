@@ -877,5 +877,98 @@
             6,
             6
         ]
+    },
+    "monk" : {
+        "hit": [ 
+            0,
+            2, 
+            2, 
+            2,
+            2,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6, 
+            6
+        ],
+        "dmg": [ 
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            3,
+            3,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+        ],
+        "stances": {
+            "custom": {
+            },
+            "tiger": {
+                "diceSize": 8,
+                "traits": [
+                    "agile",
+                    "finesse"
+                ],
+                "criticalBonusDmgDice": 4
+            },
+            "crane": {
+                "diceSize": 6,
+                "traits": [
+                    "agile",
+                    "finesse"
+                ]
+            },
+            "dragon": {
+                "diceSize": 10,
+                "traits": []
+            },
+            "wolf": {
+                "diceSize": 8,
+                "traits": [
+                    "agile",
+                    "finesse",
+                    "backstabber"
+                ]
+            },
+            "gorilla": {
+                "diceSize": 8,
+                "traits": [
+                    "forceful"
+                ]
+            },
+            "stumbling": {
+                "diceSize": 8,
+                "traits": [
+                    "agile",
+                    "finesse",
+                    "backstabber"
+                ]
+            }
+        }
     }
 }

@@ -45,6 +45,10 @@ const classChoices: ClassTypes = {
         id: "investigator",
         name: "Investigator"
     },
+    'monk': {
+        id: "monk",
+        name: "Monk"
+    },
     'ranger': {
         id: "ranger",
         name: "Ranger"
@@ -92,6 +96,38 @@ const rangerSpecs: ClassTypes = {
         name: "Precision"
     },
 }
+
+const monkStances: ClassTypes = {
+    "custom": {
+        id: "customMonk",
+        name: "Custom"
+    },
+    "tiger": {
+        id: "tigerMonk",
+        name: "Tiger"
+    },
+    "crane": {
+        id: "craneMonk",
+        name: "Crane"
+    },
+    "dragon": {
+        id: "dragonMonk",
+        name: "Dragon"
+    },
+    "wolf": {
+        id: "wolfMonk",
+        name: "Wolf"
+    },
+    "gorilla": {
+        id: "gorillaMonk",
+        name: "Gorilla"
+    },
+    "stumbling": {
+        id: "stumblingMonk",
+        name: "Stumbling"
+    }
+}
+
 
 const ClassChoice = (props: Props) => {
     const { name, setClassChoice, noLabel } = props;
@@ -173,6 +209,11 @@ export const SpecChoice = (props: SpecProps) => {
                 {classId === 'ranger' && Object.keys(rangerSpecs).map(key => (
                     <option key={key} value={key}>
                         { rangerSpecs[key].name }
+                    </option>
+                ))}
+                {classId === 'monk' && Object.keys(monkStances).map(key => (
+                    <option key={key} value={key}>
+                        { monkStances[key].name }
                     </option>
                 ))}
             </select>

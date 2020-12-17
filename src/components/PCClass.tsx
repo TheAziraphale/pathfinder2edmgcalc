@@ -74,6 +74,13 @@ export interface PCState {
     retributiveStrike: boolean;
     attackOfOpportunity: boolean;
     lastAttackWithFinisher: boolean;
+    tigerSlash: boolean;
+    craneFlutter: boolean;
+    dragonRoar: boolean;
+    wolfDrag: boolean;
+    gorillaPound: boolean;
+    gorillaFrightened: number;
+    stumblingFeint: boolean;
     amountOfAttacks: number;
     attackSelections: AttackSelection[];
 }
@@ -103,21 +110,50 @@ const PCClass = (props: Props) => {
     const [retributiveStrike, setRetributiveStrike] = useState<boolean>(false);
     const [attackOfOpportunity, setAttackOfOpportunity] = useState<boolean>(false);
     const [lastAttackWithFinisher, setLastAttackWithFinisher] = useState<boolean>(false);
+    const [tigerSlash, setTigerSlash] = useState<boolean>(false);
+    const [craneFlutter, setCraneFlutter] = useState<boolean>(false);
+    const [dragonRoar, setDragonRoar] = useState<boolean>(false);
+    const [wolfDrag, setWolfDrag] = useState<boolean>(false);
+    const [gorillaPound, setGorillaPound] = useState<boolean>(false);
+    const [gorillaFrightened, setGorillaFrightened] = useState<number>(0);
+    const [stumblingFeint, setTumblingFeint] = useState<boolean>(false);
     const [currentColor, setCurrentColor] = useState<string>(color);
     const [showHuePicker, setShowHuePicker] = useState<boolean>(false);
 
-    const createBaseWeapon = () => {
+    const createBaseWeapon = (customFatalDice?:string) => {
+        let dice = '4';
+        let deadlyDice: string = '-';  
+        let fatalDice: string = customFatalDice !== undefined ? customFatalDice : '-';  
+        let traits: string[] = undefined;  
+        let type: string = 'Melee';
+        
+        if (classChoice === 'monk') {
+            if(classSpec !== 'custom') {
+                const monkJson = getClassJson(classChoice, classSpec);
+                const monkTraits:string[] = [];
+                monkJson['stances'][classSpec]['traits'].forEach((trait) => {
+                    monkTraits.push(trait);
+                });
+                dice = monkJson['stances'][classSpec]['diceSize'].toLocaleString();
+                if (classSpec === 'tiger' && customFatalDice === undefined) {
+                    fatalDice = monkJson['stances'][classSpec]['criticalBonusDmgDice'].toLocaleString();
+                }
+                traits = monkTraits;
+            }
+        }
+        console.log("inside", dice, classChoice, classSpec);
+
         const weaponDices: WeaponDices = {
-            diceSize: '4',
-            deadlyDiceSize: '-',
-            fatalDiceSize: '-'
+            diceSize:dice,
+            deadlyDiceSize: deadlyDice,
+            fatalDiceSize: fatalDice,
         };
         const weaponTraits: WeaponTraits = {
-            agile: false, 
-            backstabber: false,
-            finesse: false,
-            forceful: false,
-            twin: false
+            agile: traits !== undefined ? traits.includes('agile') : false, 
+            backstabber: traits !== undefined ? traits.includes('backstabber') : false,
+            finesse: traits !== undefined ? traits.includes('finesse') : false,
+            forceful: traits !== undefined ? traits.includes('forceful') : false,
+            twin: traits !== undefined ? traits.includes('twin') : false
         };
         const weaponRunes: WeaponRunes = {   
             hit: true,
@@ -130,7 +166,7 @@ const PCClass = (props: Props) => {
             dices: weaponDices,
             traits: weaponTraits,
             runes: weaponRunes,
-            type: 'Melee',
+            type: type,
             rangedDmgBonus: '-',
             critRange: 20
         };
@@ -178,17 +214,30 @@ const PCClass = (props: Props) => {
             retributiveStrike,
             attackOfOpportunity,
             lastAttackWithFinisher,
+            tigerSlash,
+            craneFlutter,
+            dragonRoar,
+            wolfDrag,
+            gorillaPound,
+            gorillaFrightened,
+            stumblingFeint,
             amountOfAttacks,
             attackSelections,
-        })
+        });
     }, [
         classChoice, classSpec, strength, dexterity, intelligence, mainHand, offHand, startAtMaxMAP, ignoreMAP, hitBonus,  dmgBonus, 
         canUseDexForDmg, applySneakDmg, applyPanache,  markedTarget, rage,  deviseAStratagem, retributiveStrike, attackOfOpportunity, 
-        lastAttackWithFinisher, amountOfAttacks, enemyAcMod, acJson, currentColor, attackSelections, update
+        tigerSlash, craneFlutter, dragonRoar, wolfDrag, gorillaPound, gorillaFrightened, stumblingFeint, lastAttackWithFinisher, 
+        amountOfAttacks, enemyAcMod, acJson, currentColor, attackSelections, update
     ])
+    useEffect(() => {
+        if (tigerSlash) {
+            setAmountOfAttacks(2);
+        }
+    }, [tigerSlash])
 
     const doesClassHaveASpec = useCallback(() => {
-        if (currentPCState.classChoice === 'barbarian' || currentPCState.classChoice === 'ranger') {
+        if (currentPCState.classChoice === 'barbarian' || currentPCState.classChoice === 'ranger' || currentPCState.classChoice === 'monk') {
             return true;
         }
 
@@ -210,14 +259,28 @@ const PCClass = (props: Props) => {
         setIntelligence(18);
         setCanUseDexForDmg(false);
         setMainHand(createBaseWeapon());
+        if (classChoice === 'monk') {
+            setOffHand(undefined);
+        }
         setStartAtMaxMAP(false);
         setIgnoreMAP(false);
         setHitBonus(0);
         setDmgBonus(0);
         setAmountOfAttacks(1);
         setAttackSelections([createBaseAttackSelection(1)]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [classChoice]);
 
+    useEffect(() => {
+        setTigerSlash(classSpec === 'tiger');
+        setCraneFlutter(classSpec === 'crane');
+        setDragonRoar(classSpec === 'dragon');
+        setWolfDrag(classSpec === 'wolf');
+        setGorillaPound(classSpec === 'gorilla');
+        setGorillaFrightened(classSpec === 'gorilla' ? 1 : 0);
+        setTumblingFeint(classSpec === 'stumbling');
+    }, [classChoice, classSpec]);
+    
     useEffect(() => {
         if(attackSelections.length !== amountOfAttacks) {
             let newAttackSelections = attackSelections;
@@ -237,8 +300,6 @@ const PCClass = (props: Props) => {
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [amountOfAttacks, attackSelections]);
-
-    
 
     useEffect(() => {
         if(currentPCState === undefined || currentPCState.classChoice === '-' || (doesClassHaveASpec() && currentPCState.classSpec === '-')) {
@@ -302,13 +363,27 @@ const PCClass = (props: Props) => {
         while(level < 21) {
             let totalAmountOfDmg = 0;
             const attackSummary: AttackSummary[] = [];
+
+
             for(let attack = 1; attack <= amountOfAttacks; attack++) {
+
                 let attackSelection = attackSelections[attack - 1];
                 let weaponToAttackWith = attackSelections[attack - 1].hand === 'main' ? mainHand : offHand;
-
-                const attackChances = getAttackChances(currentPCState, weaponToAttackWith, attackSelection, attack, level, parseInt(enemyAcMod), acJson);
-                const lastAttack = attack === amountOfAttacks;
                 
+                if (level >= 6 && classSpec === 'wolf' && wolfDrag) {
+                    weaponToAttackWith = createBaseWeapon('12');
+                }
+
+                // only used for monk stumbling stance at the moment
+                let flatFootedValue = 0;
+                if (level >= 6 && classSpec === 'stumbling' && stumblingFeint && attack <= 2) {
+                    flatFootedValue = 2;
+                }
+
+                const attackChances = getAttackChances(currentPCState, weaponToAttackWith, attackSelection, attack, level, parseInt(enemyAcMod) - flatFootedValue, acJson);
+                const lastAttack = attack === amountOfAttacks;
+
+
                 let thisAttackDmg = (attackChances.hitChance / 100) * getAvgDmg(currentPCState, weaponToAttackWith, false, level, lastAttack, attack);
                 thisAttackDmg += (attackChances.criticalHitChance / 100) * getAvgDmg(currentPCState, weaponToAttackWith, true, level, lastAttack, attack);
                 
@@ -316,6 +391,11 @@ const PCClass = (props: Props) => {
                 if (attack === 1 && ((classChoice === 'champion' && retributiveStrike) || (classChoice === 'fighter' && attackOfOpportunity))) {
                     /* Symbolizes a free extra attack with reaction */
                     reactionExtraDmg = thisAttackDmg;
+                } else if (attack === 1 && classSpec === 'crane' && craneFlutter) {
+                    /* Symbolizes a free extra attack with reaction */
+                    const attackFlutterChances = getAttackChances(currentPCState, weaponToAttackWith, attackSelection, attack, level, parseInt(enemyAcMod) + 2, acJson);
+                    reactionExtraDmg = (attackFlutterChances.hitChance / 100) * getAvgDmg(currentPCState, weaponToAttackWith, false, level, lastAttack, attack);
+                    reactionExtraDmg += (attackFlutterChances.criticalHitChance / 100) * getAvgDmg(currentPCState, weaponToAttackWith, true, level, lastAttack, attack);
                 }
                 thisAttackDmg += reactionExtraDmg;
 
@@ -326,6 +406,11 @@ const PCClass = (props: Props) => {
                 thisAttackDmg += swashbucklerFinisherDmg;
 
                 attackSummary.push(getAttackSummary(attackChances, level, weaponToAttackWith, attackSelection, attack, lastAttack, thisAttackDmg))
+
+                if (level >= 6 && attack === 2 && classSpec === 'tiger' && tigerSlash) {
+                    thisAttackDmg = 0;
+                }
+
                 totalAmountOfDmg += thisAttackDmg;
             }
             attackData.push(totalAmountOfDmg);
@@ -375,6 +460,8 @@ const PCClass = (props: Props) => {
                                 setClassChoice(val);
                                 if (val === 'barbarian') {
                                     setClassSpec("animal");
+                                } else if (val === 'monk') {
+                                    setClassSpec("custom");
                                 } else if (val === 'ranger') {
                                     setClassSpec("flurry");
                                 } else {
@@ -384,7 +471,10 @@ const PCClass = (props: Props) => {
                         </div>
                         {classChoice !== '-' && doesClassHaveASpec() && (
                             <div className={'halfElement'}>
-                                <p className={'label'}>Choose your spec</p>                
+                                <p className={'label'}>{classChoice === 'barbarian' ? 'Choose instinct' : 
+                                                        classChoice === 'monk' ? 'Choose stance' : 
+                                                        classChoice === 'ranger' ? "Choose hunter's edge" : 
+                                                        'Choose spec'}</p>                
                                 <SpecChoice setSpecChoice={setClassSpec} classId={currentPCState.classChoice} noLabel={true} />
                             </div>
                         )}
@@ -474,11 +564,67 @@ const PCClass = (props: Props) => {
                                         </div>  
                                     </div>
                                 }
+                                {classChoice === 'monk' && classSpec === 'tiger' && 
+                                    <div className={'quarterElement'}>
+                                        <p className={'label'}>Abilities</p> 
+                                        <div className={'buttonCheckboxWrapper'}>
+                                            <CheckboxButtonInput value={currentPCState.tigerSlash} setValue={setTigerSlash} label={"Tiger slash, 6th lvl"} id={'checkbox_tiger_slash' + id} />
+                                        </div>  
+                                    </div>
+                                }
+                                {classChoice === 'monk' && classSpec === 'crane' && 
+                                    <div className={'quarterElement'}>
+                                        <p className={'label'}>Abilities</p> 
+                                        <div className={'buttonCheckboxWrapper'}>
+                                            <CheckboxButtonInput value={currentPCState.craneFlutter} setValue={setCraneFlutter} label={"Crane flutter, 6th lvl"} id={'checkbox_crane_flutter' + id} />
+                                        </div>  
+                                    </div>
+                                }
+                                {classChoice === 'monk' && classSpec === 'dragon' && 
+                                    <div className={'quarterElement'}>
+                                        <p className={'label'}>Abilities</p> 
+                                        <div className={'buttonCheckboxWrapper'}>
+                                            <CheckboxButtonInput value={currentPCState.dragonRoar} setValue={setDragonRoar} label={"Dragon roar, 6th lvl"} id={'checkbox_dragon_roar' + id} />
+                                        </div>  
+                                    </div>
+                                }
+                                {classChoice === 'monk' && classSpec === 'wolf' && 
+                                    <div className={'quarterElement'}>
+                                        <p className={'label'}>Abilities</p> 
+                                        <div className={'buttonCheckboxWrapper'}>
+                                            <CheckboxButtonInput value={currentPCState.wolfDrag} setValue={setWolfDrag} label={"Wolf drag, 6th lvl"} id={'checkbox_wolf_drag' + id} />
+                                        </div>  
+                                    </div>
+                                }
+                                {classChoice === 'monk' && classSpec === 'gorilla' && 
+                                    <div className={'quarterElement'} style={{marginRight: 5}}>
+                                        <p className={'label'}>Abilities</p> 
+                                        <div className={'buttonCheckboxWrapper'}>
+                                            <CheckboxButtonInput value={currentPCState.gorillaPound} setValue={setGorillaPound} label={"Gorilla pound, 6th lvl"} id={'checkbox_gorilla_pound' + id} />
+                                        </div>  
+                                    </div>
+                                }
+                                {classChoice === 'monk' && classSpec === 'gorilla' && 
+                                    <div className={'quarterElement'}>
+                                        <p className={'label'}>Frightened</p>                
+                                        <NumberInput min={0} max={5} value={currentPCState.gorillaFrightened} setValue={setGorillaFrightened} /> 
+                                    </div>
+                                }
+                                {classChoice === 'monk' && classSpec === 'stumbling' && 
+                                    <div className={'quarterElement'}>
+                                        <p className={'label'}>Abilities</p> 
+                                        <div className={'buttonCheckboxWrapper'}>
+                                            <CheckboxButtonInput value={currentPCState.stumblingFeint} setValue={setTumblingFeint} label={"Sumbling feint, 6th lvl"} id={'checkbox_stumbling_feint' + id} />
+                                        </div>  
+                                    </div>
+                                }
                             </div>
                         </div>
-                        <WeaponState weapon={mainHand} label={offHand === undefined ? 'Weapon' : 'Main hand'} setWeapon={setMainHand} pcId={id + '_mainHand'} />
-                        {offHand !== undefined ? (
-                            <WeaponState buttonCommand={() => { setOffHand(undefined) }} weapon={offHand} label={'Off hand'} setWeapon={setOffHand} pcId={id + '_offHand'} />
+                        <WeaponState currentPCState={currentPCState} weapon={mainHand} label={offHand === undefined ? 'Weapon' : 'Main hand'} setWeapon={setMainHand} pcId={id + '_mainHand'} />
+                        {classChoice === 'monk' && classSpec !== 'custom' ? (
+                            <div></div>
+                        ) : offHand !== undefined ? (
+                            <WeaponState currentPCState={currentPCState} buttonCommand={() => { setOffHand(undefined) }} weapon={offHand} label={'Off hand'} setWeapon={setOffHand} pcId={id + '_offHand'} />
                         ) : (
                             <div className={'labelElement'}>
                                 <div className={'elementContainer'} style={{height: 30}}>
@@ -501,7 +647,7 @@ const PCClass = (props: Props) => {
                             <div className={'elementContainer'}>
                                 <div className={'oneThirdElement'} style={{width: 140}} >
                                     <p className={'label'}>Number of attacks</p>                
-                                    <NumberInput min={1} max={10} value={currentPCState.amountOfAttacks} setValue={setAmountOfAttacks} /> 
+                                    <NumberInput min={tigerSlash ? 2 : 1} max={10} value={currentPCState.amountOfAttacks} setValue={setAmountOfAttacks} /> 
                                 </div>
                                 <div className={'twoFifthElement'}>
                                     <p className={'label'}>Bonus to hit</p>  

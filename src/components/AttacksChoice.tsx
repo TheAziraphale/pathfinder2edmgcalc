@@ -56,6 +56,7 @@ const AttacksChoice = (props: Props) => {
                             <p className={'labelName labelSmall'}>{'Hand'}</p>
                             {attackSelections.map((attack, index) => {
                                 if(index < 5) {
+                                    console.log(currentPCState.tigerSlash && currentPCState.classSpec === 'tiger' && index === 1)
                                     return ( 
                                         <select key={'hand_' + index} defaultValue={attack.hand} onChange={(event) => { 
                                             attackSelections[index].hand = event.target.value;
@@ -69,27 +70,32 @@ const AttacksChoice = (props: Props) => {
                                     return null;
                             })}
                         </div>
-                    </div>}
+                    </div>
+                }
                 {!alwaysMaxMap && !ignoreMap &&
                     <div className={'oneFifthElement'}>
                         <div>
                             <p className={'labelName labelSmall'}>{'MAP'}</p>
                             {attackSelections.map((attack, index) => {
                                 if(index < 5) {
-                                    const mapLabel = getMAP(currentPCState, 1, attack); 
-                                    return ( 
-                                        <div key={'map_container_' + index} className={'flexRow attackChoiceSelect'}>
-                                            <select key={'map_' + index} defaultValue={attack.map} onChange={(event) => { 
-                                                attackSelections[index].map = event.target.value;
-                                                setAttackSelections(attackSelections);
-                                            }}>
-                                                <option key={'1_' + index} value={'1'}> {'1st'} </option>
-                                                <option key={'2_' + index} value={'2'}> {'2nd'} </option>
-                                                <option key={'3_' + index} value={'3'}> {'3rd'} </option>
-                                            </select>
-                                            <div key={'mapLabel_' + index} className={'mapLabel'}>{(mapLabel === 0 ? '±' : '') + mapLabel}</div>
-                                        </div>
-                                    )
+                                    if (currentPCState.tigerSlash && currentPCState.classSpec === 'tiger' && index === 1) {
+                                        return (<p key={'tigerSlash_' + index} className={'numberListLabel'} >{'Blocked'} </p>)
+                                    } else {
+                                        const mapLabel = getMAP(currentPCState, 1, attack); 
+                                        return ( 
+                                            <div key={'map_container_' + index} className={'flexRow attackChoiceSelect'}>
+                                                <select key={'map_' + index} defaultValue={attack.map} onChange={(event) => { 
+                                                    attackSelections[index].map = event.target.value;
+                                                    setAttackSelections(attackSelections);
+                                                }}>
+                                                    <option key={'1_' + index} value={'1'}> {'1st'} </option>
+                                                    <option key={'2_' + index} value={'2'}> {'2nd'} </option>
+                                                    <option key={'3_' + index} value={'3'}> {'3rd'} </option>
+                                                </select>
+                                                <div key={'mapLabel_' + index} className={'mapLabel'}>{(mapLabel === 0 ? '±' : '') + mapLabel}</div>
+                                            </div>
+                                        )
+                                    }
                                 } else
                                     return null;
                             })}

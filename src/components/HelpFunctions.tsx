@@ -1,5 +1,5 @@
 //import React from 'react';
-import ClassChoices from '../jsons/ClassChoices.json';
+import Classes from '../jsons/Classes.json';
 import Bonuses from '../jsons/Bonuses.json';
 import PropertyRunes from '../jsons/PropertyRunes.json';
 import { PCState } from './PCClass';
@@ -13,7 +13,8 @@ export const getTotalHitBonus = (level: number,
         hitBonus: number,
         hitAbilityBonus: number,
     ) => {
-    if(ClassChoices !== undefined && getClassJson(classChoice, classSpec) !== undefined) {
+
+    if(Classes !== undefined && getClassJson(classChoice, classSpec) !== undefined) {
         const classHitBonus = getClassJson(classChoice, classSpec).hit[level];
         const enchantmentHitBonus = applyPlusHitRunes ? Bonuses['EnchantingBonuses'].hitBonus[level] : 0;
         return classHitBonus + enchantmentHitBonus + hitAbilityBonus + level + hitBonus;
@@ -24,12 +25,12 @@ export const getTotalHitBonus = (level: number,
 
 export const getClassJson = (classChoice: string, classSpec: string) => {
     if (classChoice === 'barbarian') {
-        return ClassChoices[classChoice][classSpec];
+        return Classes[classChoice][classSpec];
     } else if (classChoice === 'ranger') {
-        return ClassChoices[classChoice][classSpec];
+        return Classes[classChoice][classSpec];
     }
 
-    return ClassChoices[classChoice];
+    return Classes[classChoice];
 };
 
 export const getAbilityBonus = (level: number, stat: number) => {
@@ -172,8 +173,22 @@ export const getClassDmg = (currentPCState: PCState, level: number) => {
 
 export const getAvgDmg = (currentPCState: PCState, weapon: Weapon, crit:boolean, level:number, lastAttack?: boolean, attack?: number) => {
 
-    const numberOfDice = weapon.runes.striking ? Bonuses['EnchantingBonuses'].striking[level] + 1 : 1;
+    let numberOfDice = weapon.runes.striking ? Bonuses['EnchantingBonuses'].striking[level] + 1 : 1;
     let bonusDmg:number = getDmgFromAbility(currentPCState, weapon, level);
+    
+    if (currentPCState.classSpec === 'tiger' && currentPCState.tigerSlash && level >= 6 && crit && attack === 1) {
+        numberOfDice += level >= 14 ? 3 : 2;
+        bonusDmg *= 2;
+    }
+
+    if (currentPCState.classSpec === 'dragon' && currentPCState.dragonRoar && level >= 6 && attack === 1) {
+        bonusDmg += 6;
+    }
+
+    if (currentPCState.classSpec === 'gorilla' && currentPCState.gorillaPound && level >= 6 && attack === 1) {
+        bonusDmg += 3 * currentPCState.gorillaFrightened;
+    }
+
     bonusDmg += getClassDmg(currentPCState, level);
     bonusDmg += getClassBonusDmg(currentPCState, level, lastAttack, attack);
     bonusDmg += getDmgFromWeaponTraits(weapon, level, attack);
@@ -194,7 +209,8 @@ export const getAvgDmg = (currentPCState: PCState, weapon: Weapon, crit:boolean,
             dmg += (parseInt(weapon.dices.deadlyDiceSize)/2 + 0.5) * deadlyProgression;
         }
 
-        dmg += getExtraDamageFromPropertyRunes(level, crit, weapon.runes);
+        dmg += getExtraDamageFromPropertyRunes(level, crit, weapon.runes);    
+        
         return dmg;
     } else {
         bonusDmg += getExtraDamageFromPropertyRunes(level, crit, weapon.runes);
