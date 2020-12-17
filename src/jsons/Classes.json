@@ -927,6 +927,11 @@
         ],
         "stances": {
             "custom": {
+                "diceSize": 6,
+                "traits": [
+                    "agile",
+                    "finesse"
+                ]
             },
             "tiger": {
                 "diceSize": 8,

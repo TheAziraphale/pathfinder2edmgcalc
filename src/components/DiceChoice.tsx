@@ -2,14 +2,14 @@ import React from 'react';
 import './Components.css';
 
 interface Props {
-    startDiceValue?: string
+    diceValue: string
     setDiceValue: (diceValue: string) => void;
     allowNoInput: boolean;
     name?: string;
 }
 
 const DiceChoice = (props: Props) => {
-    const { name, startDiceValue, setDiceValue, allowNoInput } = props;
+    const { name, diceValue, setDiceValue, allowNoInput } = props;
 
     return (
         <div className={'inputContainer'}>
@@ -18,7 +18,7 @@ const DiceChoice = (props: Props) => {
                     <p className={'labelName'}>{name}</p>
                 </div>
             )}
-            D <select className={'inputNumberSmall'} defaultValue={startDiceValue} onChange={(event) => { 
+            D <select className={'inputNumberSmall'} value={diceValue} onChange={(event) => { 
                 setDiceValue(event.target.value)
             }}>
                 {allowNoInput && <option> {'-'} </option>}

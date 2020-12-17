@@ -104,7 +104,7 @@ export const getDmgFromAbility = (currentPCState: PCState, weapon: Weapon, level
     return dmgFromAbility;
 }
 
-export const getClassBonusDmg = (currentPCState: PCState, level: number, lastAttack?: boolean, attack?: number ) => {
+export const getClassBonusDmg = (currentPCState: PCState, level: number, lastAttack?: boolean, attack?: number) => {
     const classJson = getClassJson(currentPCState.classChoice, currentPCState.classSpec);
     let classBonusDmg = 0;
 
@@ -137,6 +137,15 @@ export const getClassBonusDmg = (currentPCState: PCState, level: number, lastAtt
             classBonusDmg += classJson.precision3AttackDice[level] * (RangerPrecisionDiceSize/2 + 0.5);
         }
     }
+
+    if (currentPCState.classSpec === 'dragon' && currentPCState.dragonRoar && level >= 6 && attack === 1) {
+        classBonusDmg += 4;
+    }
+
+    if (currentPCState.classSpec === 'gorilla' && currentPCState.gorillaPound && level >= 6 && attack === 1) {
+        classBonusDmg += 3 * currentPCState.gorillaFrightened;
+    }
+
 
     return classBonusDmg;
 }
@@ -175,18 +184,10 @@ export const getAvgDmg = (currentPCState: PCState, weapon: Weapon, crit:boolean,
 
     let numberOfDice = weapon.runes.striking ? Bonuses['EnchantingBonuses'].striking[level] + 1 : 1;
     let bonusDmg:number = getDmgFromAbility(currentPCState, weapon, level);
-    
+
     if (currentPCState.classSpec === 'tiger' && currentPCState.tigerSlash && level >= 6 && crit && attack === 1) {
         numberOfDice += level >= 14 ? 3 : 2;
-        bonusDmg *= 2;
-    }
-
-    if (currentPCState.classSpec === 'dragon' && currentPCState.dragonRoar && level >= 6 && attack === 1) {
-        bonusDmg += 6;
-    }
-
-    if (currentPCState.classSpec === 'gorilla' && currentPCState.gorillaPound && level >= 6 && attack === 1) {
-        bonusDmg += 3 * currentPCState.gorillaFrightened;
+        bonusDmg *=2;
     }
 
     bonusDmg += getClassDmg(currentPCState, level);

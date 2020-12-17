@@ -120,28 +120,26 @@ const PCClass = (props: Props) => {
     const [currentColor, setCurrentColor] = useState<string>(color);
     const [showHuePicker, setShowHuePicker] = useState<boolean>(false);
 
-    const createBaseWeapon = (customFatalDice?:string) => {
+    const createBaseWeapon = useCallback((customFatalDice?:string) => {
         let dice = '4';
         let deadlyDice: string = '-';  
         let fatalDice: string = customFatalDice !== undefined ? customFatalDice : '-';  
         let traits: string[] = undefined;  
         let type: string = 'Melee';
+
         
         if (classChoice === 'monk') {
-            if(classSpec !== 'custom') {
-                const monkJson = getClassJson(classChoice, classSpec);
-                const monkTraits:string[] = [];
-                monkJson['stances'][classSpec]['traits'].forEach((trait) => {
-                    monkTraits.push(trait);
-                });
-                dice = monkJson['stances'][classSpec]['diceSize'].toLocaleString();
-                if (classSpec === 'tiger' && customFatalDice === undefined) {
-                    fatalDice = monkJson['stances'][classSpec]['criticalBonusDmgDice'].toLocaleString();
-                }
-                traits = monkTraits;
+            const monkJson = getClassJson(classChoice, classSpec);
+            const monkTraits:string[] = [];
+            monkJson['stances'][classSpec]['traits'].forEach((trait) => {
+                monkTraits.push(trait);
+            });
+            dice = monkJson['stances'][classSpec]['diceSize'].toLocaleString();
+            if (classSpec === 'tiger' && customFatalDice === undefined) {
+                deadlyDice = monkJson['stances'][classSpec]['criticalBonusDmgDice'].toLocaleString();
             }
+            traits = monkTraits;
         }
-        console.log("inside", dice, classChoice, classSpec);
 
         const weaponDices: WeaponDices = {
             diceSize:dice,
@@ -172,7 +170,8 @@ const PCClass = (props: Props) => {
         };
 
         return weapon;
-    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [classChoice, classSpec])
 
     const createBaseAttackSelection = (attack: number) => {
         return {hand: 'main', map: attack === 1 ? '1' : attack === 2 ? '2' : '3' };
@@ -230,11 +229,19 @@ const PCClass = (props: Props) => {
         tigerSlash, craneFlutter, dragonRoar, wolfDrag, gorillaPound, gorillaFrightened, stumblingFeint, lastAttackWithFinisher, 
         amountOfAttacks, enemyAcMod, acJson, currentColor, attackSelections, update
     ])
+
     useEffect(() => {
         if (tigerSlash) {
             setAmountOfAttacks(2);
         }
     }, [tigerSlash])
+
+    useEffect(() => {
+        if (classChoice === 'monk' && classSpec !== '') {
+            setMainHand(createBaseWeapon());
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [classSpec, classChoice])
 
     const doesClassHaveASpec = useCallback(() => {
         if (currentPCState.classChoice === 'barbarian' || currentPCState.classChoice === 'ranger' || currentPCState.classChoice === 'monk') {
@@ -364,12 +371,12 @@ const PCClass = (props: Props) => {
             let totalAmountOfDmg = 0;
             const attackSummary: AttackSummary[] = [];
 
-
             for(let attack = 1; attack <= amountOfAttacks; attack++) {
 
                 let attackSelection = attackSelections[attack - 1];
                 let weaponToAttackWith = attackSelections[attack - 1].hand === 'main' ? mainHand : offHand;
                 
+                // console.log(weaponToAttackWith);
                 if (level >= 6 && classSpec === 'wolf' && wolfDrag) {
                     weaponToAttackWith = createBaseWeapon('12');
                 }

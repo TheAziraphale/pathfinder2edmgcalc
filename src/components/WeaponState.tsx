@@ -67,6 +67,27 @@ const WeaponState = (props: Props) => {
     const [thirdPropRune, setThirdPropRune] = useState<string>(weapon?.runes.thirdPropRune);
 
     useEffect(() => {
+        if (weapon !== undefined) {
+            setDiceSize(weapon.dices.diceSize);
+            setDeadlyDiceSize(weapon.dices.deadlyDiceSize);
+            setFatalDiceSize(weapon.dices.fatalDiceSize);
+            setWeaponType(weapon.type);
+            setRangedDmgBonus(weapon.rangedDmgBonus);
+            setCritRange(weapon.critRange);
+            setAgile(weapon.traits.agile);
+            setBackstabber(weapon.traits.backstabber);
+            setFinesse(weapon.traits.finesse);
+            setForceful(weapon.traits.forceful);
+            setTwin(weapon.traits.twin);
+            setApplyPlusHitRunes(weapon.runes.hit);
+            setApplyStrikingRunes(weapon.runes.striking);
+            setFirstPropRune(weapon.runes.firstPropRune);
+            setSecondPropRune(weapon.runes.secondPropRune);
+            setThirdPropRune(weapon.runes.thirdPropRune);
+        }
+    }, [weapon])
+
+    useEffect(() => {
         const weaponDices: WeaponDices = {
             diceSize:diceSize,
             deadlyDiceSize: deadlyDiceSize,
@@ -119,19 +140,19 @@ const WeaponState = (props: Props) => {
                 </div>
             </div>
             <div className={'elementWrapper'}>
-                {!(currentPCState.classChoice === 'monk' && currentPCState.classSpec !== 'custom') && 
+                {(true || !(currentPCState.classChoice === 'monk' && currentPCState.classSpec !== 'custom') ) && 
                     <div className={'elementContainer'}>
                         <div className={'quarterElement'} >
                             <p className={'label'}>Dice size</p>                
-                            <DiceChoice startDiceValue={weapon.dices.diceSize} allowNoInput={false} setDiceValue={setDiceSize} /> 
+                            <DiceChoice diceValue={weapon.dices.diceSize} allowNoInput={false} setDiceValue={setDiceSize} /> 
                         </div>
                         <div className={'quarterElement'} >
                             <p className={'label'}>Deadly?</p>                
-                            <DiceChoice startDiceValue={weapon.dices.deadlyDiceSize} allowNoInput={true} setDiceValue={setDeadlyDiceSize} />
+                            <DiceChoice diceValue={weapon.dices.deadlyDiceSize} allowNoInput={true} setDiceValue={setDeadlyDiceSize} />
                         </div>
                         <div className={'quarterElement'} >
                             <p className={'label'}>Fatal?</p>                
-                            <DiceChoice startDiceValue={weapon.dices.fatalDiceSize} allowNoInput={true} setDiceValue={setFatalDiceSize} />
+                            <DiceChoice diceValue={weapon.dices.fatalDiceSize} allowNoInput={true} setDiceValue={setFatalDiceSize} />
                         </div>
                         <div className={'quarterElement'} >
                             <p className={'label'}>Crit range</p>                
@@ -139,7 +160,7 @@ const WeaponState = (props: Props) => {
                         </div>
                     </div>
                 }
-                {!(currentPCState.classChoice === 'monk' && currentPCState.classSpec !== 'custom') && 
+                {(true || !(currentPCState.classChoice === 'monk' && currentPCState.classSpec !== 'custom') ) && 
                     <div className={'elementContainer'}>
                         <div className={'twoFifthElement'} >
                             <p className={'label'}>Weapon type </p>   
