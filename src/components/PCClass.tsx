@@ -627,11 +627,11 @@ const PCClass = (props: Props) => {
                                 }
                             </div>
                         </div>
-                        <WeaponState currentPCState={currentPCState} weapon={mainHand} label={offHand === undefined ? 'Weapon' : 'Main hand'} setWeapon={setMainHand} pcId={id + '_mainHand'} />
+                        <WeaponState weapon={mainHand} label={offHand === undefined ? 'Weapon' : 'Main hand'} setWeapon={setMainHand} pcId={id + '_mainHand'} />
                         {classChoice === 'monk' && classSpec !== 'custom' ? (
                             <div></div>
                         ) : offHand !== undefined ? (
-                            <WeaponState currentPCState={currentPCState} buttonCommand={() => { setOffHand(undefined) }} weapon={offHand} label={'Off hand'} setWeapon={setOffHand} pcId={id + '_offHand'} />
+                            <WeaponState buttonCommand={() => { setOffHand(undefined) }} weapon={offHand} label={'Off hand'} setWeapon={setOffHand} pcId={id + '_offHand'} />
                         ) : (
                             <div className={'labelElement'}>
                                 <div className={'elementContainer'} style={{height: 30}}>
