@@ -201,6 +201,17 @@ export const getDmgFromWeaponTraits = (weapon: Weapon, level: number, attack?: n
     return weaponBonusDmg;
 }
 
+export const getPolymorphShape = (currentPCState: PCState, level: number) => {
+    if (currentPCState.classChoice === 'druid') {
+        const highestAccessedForm = getClosestDruidForm(level, currentPCState.druidForms);
+
+        if (highestAccessedForm && !highestAccessedForm.wildMorph) {
+            return true;
+        }
+    } 
+    return false;
+};
+
 export const getClassDmg = (currentPCState: PCState, level: number, attack: number) => {
     if (currentPCState.classChoice === 'druid') {
         const highestAccessedForm = getClosestDruidForm(level, currentPCState.druidForms);

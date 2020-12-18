@@ -19,6 +19,7 @@ import {
     getTotalHitBonus,
     getAbilityBonus,
     getHitStat,
+    getPolymorphShape,
 } from './HelpFunctions';
 import { getAttackChances } from './HelpFunctions';
 import AttackChoices, { AttackSelection } from './AttacksChoice';
@@ -348,12 +349,14 @@ const PCClass = (props: Props) => {
         let weaponTraitBonusDmg = getDmgFromWeaponTraits(weaponToAttackWith, level, attack);
         let untypedBonusDmg = currentPCState.dmgBonus;
 
+        
+
         return {
             weapon: weaponToAttackWith,
             attackSelection: attackSelection,
             attackChances: attackChances,
             totalHit: totalHitChance,
-            totalDmg: extraRuneDmg + abilityBonusDmg + classDmg + classBonusDmg + weaponTraitBonusDmg + untypedBonusDmg,
+            totalDmg: getPolymorphShape(currentPCState, level) ? classDmg : extraRuneDmg + abilityBonusDmg + classDmg + classBonusDmg + weaponTraitBonusDmg + untypedBonusDmg,
             extraRuneDmg: runeBonusDmg,
             abilityBonusDmg: abilityBonusDmg,
             abilityBonusHit: hitAbilityBonus,
