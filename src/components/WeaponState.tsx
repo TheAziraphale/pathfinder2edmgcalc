@@ -5,11 +5,13 @@ import DiceChoice from './DiceChoice';
 import NumberInput from './NumberInput';
 import CheckboxButtonInput from './CheckboxButtonInput';
 import { Button } from '@material-ui/core';
+import { PCState } from './PCClass';
 
 interface Props {
     label: string;
     setWeapon: (weapon: Weapon) => void;
     pcId: string;
+    currentPCState: PCState;
     weapon?: Weapon;
     buttonCommand?: () => void;
 }
@@ -46,7 +48,7 @@ export interface WeaponTraits {
 }
 
 const WeaponState = (props: Props) => {
-    const { setWeapon, weapon, pcId, label, buttonCommand } = props;
+    const { setWeapon, weapon, pcId, label, buttonCommand, currentPCState } = props;
     const [diceSize, setDiceSize] = useState<string>(weapon?.dices.diceSize);
     const [deadlyDiceSize, setDeadlyDiceSize] = useState<string>(weapon?.dices.deadlyDiceSize);
     const [fatalDiceSize, setFatalDiceSize] = useState<string>(weapon?.dices.fatalDiceSize);
@@ -138,65 +140,69 @@ const WeaponState = (props: Props) => {
                 </div>
             </div>
             <div className={'elementWrapper'}>
-                <div className={'elementContainer'}>
-                    <div className={'quarterElement'} >
-                        <p className={'label'}>Dice size</p>                
-                        <DiceChoice diceValue={weapon.dices.diceSize} allowNoInput={false} setDiceValue={setDiceSize} /> 
-                    </div>
-                    <div className={'quarterElement'} >
-                        <p className={'label'}>Deadly?</p>                
-                        <DiceChoice diceValue={weapon.dices.deadlyDiceSize} allowNoInput={true} setDiceValue={setDeadlyDiceSize} />
-                    </div>
-                    <div className={'quarterElement'} >
-                        <p className={'label'}>Fatal?</p>                
-                        <DiceChoice diceValue={weapon.dices.fatalDiceSize} allowNoInput={true} setDiceValue={setFatalDiceSize} />
-                    </div>
-                    <div className={'quarterElement'} >
-                        <p className={'label'}>Crit range</p>                
-                        <NumberInput min={2} max={20} value={weapon.critRange} setValue={setCritRange} />
-                    </div>
-                </div>
-                <div className={'elementContainer'}>
-                    <div className={'twoFifthElement'} >
-                        <p className={'label'}>Weapon type </p>   
-                        <select defaultValue={weapon.type} onChange={(event) => {
-                            setWeaponType(event.target.value);
-                        }}>
-                            <option key={'melee'} value={'Melee'}>Melee</option>
-                            <option key={'ranged'} value={'Ranged'}>Ranged</option>
-                        </select>
-                    </div>
-                    {weaponType === 'Melee' && (
-                        <div className={'twoThirdElement'}>
-                            <p className={'label'}>Traits</p>   
-                            <div className={'buttonCheckboxWrapper'}>
-                                <CheckboxButtonInput value={weapon.traits.agile} setValue={setAgile} label={'Agile'} id={'checkbox_agile' + pcId} /> 
-                                <CheckboxButtonInput value={weapon.traits.backstabber} setValue={setBackstabber} label={'Backstabber'} id={'checkbox_backstabber' + pcId} /> 
-                                <CheckboxButtonInput value={weapon.traits.finesse} setValue={setFinesse} label={'Finesse'} id={'checkbox_finesse' + pcId} /> 
-                                <CheckboxButtonInput value={weapon.traits.forceful} setValue={setForceful} label={'Forceful'} id={'checkbox_forceful' + pcId} /> 
-                                <CheckboxButtonInput value={weapon.traits.twin} setValue={setTwin} label={'Twin'} id={'checkbox_twin' + pcId} /> 
-                            </div>
+                {currentPCState.classChoice !== 'druid' &&
+                    <div className={'elementContainer'}>
+                        <div className={'quarterElement'} >
+                            <p className={'label'}>Dice size</p>                
+                            <DiceChoice diceValue={weapon.dices.diceSize} allowNoInput={false} setDiceValue={setDiceSize} /> 
                         </div>
-                    )}
-                    {weaponType === 'Ranged' && (
-                        <div className={'twoThirdElement'}>
-                            <p className={'label'}>Damage bonus</p>   
-                            <select defaultValue={weapon.rangedDmgBonus} onChange={(event) => { 
-                                setRangedDmgBonus(event.target.value)
+                        <div className={'quarterElement'} >
+                            <p className={'label'}>Deadly?</p>                
+                            <DiceChoice diceValue={weapon.dices.deadlyDiceSize} allowNoInput={true} setDiceValue={setDeadlyDiceSize} />
+                        </div>
+                        <div className={'quarterElement'} >
+                            <p className={'label'}>Fatal?</p>                
+                            <DiceChoice diceValue={weapon.dices.fatalDiceSize} allowNoInput={true} setDiceValue={setFatalDiceSize} />
+                        </div>
+                        <div className={'quarterElement'} >
+                            <p className={'label'}>Crit range</p>                
+                            <NumberInput min={2} max={20} value={weapon.critRange} setValue={setCritRange} />
+                        </div>
+                    </div>
+                }
+                {currentPCState.classChoice !== 'druid' &&
+                    <div className={'elementContainer'}>
+                        <div className={'twoFifthElement'} >
+                            <p className={'label'}>Weapon type </p>   
+                            <select defaultValue={weapon.type} onChange={(event) => {
+                                setWeaponType(event.target.value);
                             }}>
-                                <option key={"-"} value={'-'}>
-                                    { "None"}
-                                </option>
-                                <option key={"propulsive"} value={'propulsive'}>
-                                    { "Propulsive"}
-                                </option>
-                                <option key={"thrown"} value={'thrown'}>
-                                    { "Thrown" }
-                                </option>
+                                <option key={'melee'} value={'Melee'}>Melee</option>
+                                <option key={'ranged'} value={'Ranged'}>Ranged</option>
                             </select>
                         </div>
-                    )}
-                </div>
+                        {weaponType === 'Melee' && (
+                            <div className={'twoThirdElement'}>
+                                <p className={'label'}>Traits</p>   
+                                <div className={'buttonCheckboxWrapper'}>
+                                    <CheckboxButtonInput value={weapon.traits.agile} setValue={setAgile} label={'Agile'} id={'checkbox_agile' + pcId} /> 
+                                    <CheckboxButtonInput value={weapon.traits.backstabber} setValue={setBackstabber} label={'Backstabber'} id={'checkbox_backstabber' + pcId} /> 
+                                    <CheckboxButtonInput value={weapon.traits.finesse} setValue={setFinesse} label={'Finesse'} id={'checkbox_finesse' + pcId} /> 
+                                    <CheckboxButtonInput value={weapon.traits.forceful} setValue={setForceful} label={'Forceful'} id={'checkbox_forceful' + pcId} /> 
+                                    <CheckboxButtonInput value={weapon.traits.twin} setValue={setTwin} label={'Twin'} id={'checkbox_twin' + pcId} /> 
+                                </div>
+                            </div>
+                        )}
+                        {weaponType === 'Ranged' && (
+                            <div className={'twoThirdElement'}>
+                                <p className={'label'}>Damage bonus</p>   
+                                <select defaultValue={weapon.rangedDmgBonus} onChange={(event) => { 
+                                    setRangedDmgBonus(event.target.value)
+                                }}>
+                                    <option key={"-"} value={'-'}>
+                                        { "None"}
+                                    </option>
+                                    <option key={"propulsive"} value={'propulsive'}>
+                                        { "Propulsive"}
+                                    </option>
+                                    <option key={"thrown"} value={'thrown'}>
+                                        { "Thrown" }
+                                    </option>
+                                </select>
+                            </div>
+                        )}
+                    </div>
+                }
                 <div className={'elementContainer'} style={{height: 50}}>
                     <div className={'fullElement'} >
                         <p className={'label'}>Fundamental runes </p>  

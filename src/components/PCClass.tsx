@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import 'rc-color-picker/assets/index.css';
 import ClassChoice, { SpecChoice } from './ClassChoice';
+import FormChoices, { Form } from './FormChoices';
 import { Button, Paper } from '@material-ui/core';
 import './PCClass.css';
 import NumberInput from './NumberInput';
@@ -81,6 +82,7 @@ export interface PCState {
     gorillaPound: boolean;
     gorillaFrightened: number;
     stumblingFeint: boolean;
+    druidForms: Form[];
     amountOfAttacks: number;
     attackSelections: AttackSelection[];
 }
@@ -117,6 +119,7 @@ const PCClass = (props: Props) => {
     const [gorillaPound, setGorillaPound] = useState<boolean>(false);
     const [gorillaFrightened, setGorillaFrightened] = useState<number>(0);
     const [stumblingFeint, setTumblingFeint] = useState<boolean>(false);
+    const [druidForms, setDruidForms] = useState<Form[]>();
     const [currentColor, setCurrentColor] = useState<string>(color);
     const [showHuePicker, setShowHuePicker] = useState<boolean>(false);
 
@@ -220,13 +223,14 @@ const PCClass = (props: Props) => {
             gorillaPound,
             gorillaFrightened,
             stumblingFeint,
+            druidForms,
             amountOfAttacks,
             attackSelections,
         });
     }, [
         classChoice, classSpec, strength, dexterity, intelligence, mainHand, offHand, startAtMaxMAP, ignoreMAP, hitBonus,  dmgBonus, 
         canUseDexForDmg, applySneakDmg, applyPanache,  markedTarget, rage,  deviseAStratagem, retributiveStrike, attackOfOpportunity, 
-        tigerSlash, craneFlutter, dragonRoar, wolfDrag, gorillaPound, gorillaFrightened, stumblingFeint, lastAttackWithFinisher, 
+        tigerSlash, craneFlutter, dragonRoar, wolfDrag, gorillaPound, gorillaFrightened, stumblingFeint, lastAttackWithFinisher, druidForms,
         amountOfAttacks, enemyAcMod, acJson, currentColor, attackSelections, update
     ])
 
@@ -259,6 +263,7 @@ const PCClass = (props: Props) => {
         setMarkedTarget(classChoice === 'ranger');
         setRage(classChoice === 'barbarian');
         setDeviseAStratagem(classChoice === 'investigator');
+        setDruidForms(undefined);
         setRetributiveStrike(false);
         setAttackOfOpportunity(false);
         setStrength(18);
@@ -330,7 +335,7 @@ const PCClass = (props: Props) => {
         if ((attack === 1 && currentPCState.classChoice === 'investigator') && currentPCState.deviseAStratagem) {
             hitAbilityBonus = getAbilityBonus(level, currentPCState.stats.intelligence);
         }
-        let totalHitChance = getTotalHitBonus(level, currentPCState.classChoice, currentPCState.classSpec, weaponToAttackWith.runes.hit, currentPCState.hitBonus, hitAbilityBonus);
+        let totalHitChance = getTotalHitBonus(level, currentPCState.classChoice, currentPCState.classSpec, weaponToAttackWith.runes.hit, currentPCState.hitBonus, hitAbilityBonus, currentPCState.druidForms);
         
         if(!currentPCState.ignoreMAP) {
             totalHitChance += getMAP(currentPCState, level, attackSelection);
@@ -338,7 +343,7 @@ const PCClass = (props: Props) => {
     
         let extraRuneDmg = runeBonusDmg;
         let abilityBonusDmg = getDmgFromAbility(currentPCState, weaponToAttackWith, level);
-        let classDmg = getClassDmg(currentPCState, level);
+        let classDmg = getClassDmg(currentPCState, level, attack);
         let classBonusDmg = getClassBonusDmg(currentPCState, level, lastAttack, attack);
         let weaponTraitBonusDmg = getDmgFromWeaponTraits(weaponToAttackWith, level, attack);
         let untypedBonusDmg = currentPCState.dmgBonus;
@@ -487,6 +492,14 @@ const PCClass = (props: Props) => {
                         )}
                     </div>
                 </div>
+                { classChoice === 'druid' && (
+                    <div>
+                        <div className={'labelElement'}>
+                            <p className={'labelHeader'}>Form choices</p>   
+                        </div>
+                        <FormChoices setFormChoices={setDruidForms} />
+                    </div>
+                )}
                 {classChoice !== '-' && (classSpec !== '-' || !doesClassHaveASpec()) && (
                     <div>
                         <div className={'labelElement'}>
@@ -627,11 +640,11 @@ const PCClass = (props: Props) => {
                                 }
                             </div>
                         </div>
-                        <WeaponState weapon={mainHand} label={offHand === undefined ? 'Weapon' : 'Main hand'} setWeapon={setMainHand} pcId={id + '_mainHand'} />
-                        {classChoice === 'monk' && classSpec !== 'custom' ? (
+                        <WeaponState currentPCState={currentPCState} weapon={mainHand} label={classChoice === 'druid' ? 'Wildmorph wraps runes' : offHand === undefined ? 'Weapon' : 'Main hand'} setWeapon={setMainHand} pcId={id + '_mainHand'} />
+                        {(classChoice === 'monk' && classSpec !== 'custom') || classChoice === 'druid' ? (
                             <div></div>
                         ) : offHand !== undefined ? (
-                            <WeaponState buttonCommand={() => { setOffHand(undefined) }} weapon={offHand} label={'Off hand'} setWeapon={setOffHand} pcId={id + '_offHand'} />
+                            <WeaponState currentPCState={currentPCState} buttonCommand={() => { setOffHand(undefined) }} weapon={offHand} label={'Off hand'} setWeapon={setOffHand} pcId={id + '_offHand'} />
                         ) : (
                             <div className={'labelElement'}>
                                 <div className={'elementContainer'} style={{height: 30}}>

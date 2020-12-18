@@ -37,6 +37,10 @@ const classChoices: ClassTypes = {
         id: "champion",
         name: "Champion"
     },
+    'druid': {
+        id: "druid",
+        name: "Druid"
+    },
     'fighter': {
         id: "fighter",
         name: "Fighter"

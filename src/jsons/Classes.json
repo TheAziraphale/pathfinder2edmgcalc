@@ -975,5 +975,847 @@
                 ]
             }
         }
+    },  
+    "druid" : {
+        "hit": [ 
+            0,
+            2, 
+            2, 
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4, 
+            4
+        ],
+         "dmg": [ 
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2
+        ],
+        "forms": {
+            "wildmorph": {
+                "accessLevel": 1,
+                "1" : {
+                    "claws" : {
+                        "diceSize": 6,
+                        "diceAmount": 1,
+                        "traits": [
+                            "agile",
+                            "finesse"
+                        ]
+                    },
+                    "numberOfAvailableAttacks": 1
+                },
+                "5" : {
+                    "claws" : {
+                        "diceSize": 6,
+                        "diceAmount": 1,
+                        "traits": [
+                            "agile",
+                            "finesse"
+                        ]
+                    },
+                    "jaws" : {
+                        "diceSize": 8,
+                        "diceAmount": 1,
+                        "traits": []
+                    },
+                    "numberOfAvailableAttacks": 1
+                },
+                "11" : {
+                    "claws" : {
+                        "diceSize": 6,
+                        "diceAmount": 1,
+                        "traits": [
+                            "agile",
+                            "finesse"
+                        ],
+                        "hitBonusDmgDice": 6,
+                        "hitBonusAmountOfDice": 2
+                    },
+                    "jaws" : {
+                        "diceSize": 8,
+                        "diceAmount": 1,
+                        "traits": [],
+                        "hitBonusDmgDice": 6,
+                        "hitBonusAmountOfDice": 2
+                    },
+                    "numberOfAvailableAttacks": 2
+                },
+                "19" : {
+                    "claws" : {
+                        "diceSize": 6,
+                        "diceAmount": 1,
+                        "traits": [
+                            "agile",
+                            "finesse"
+                        ],
+                        "hitBonusDmgDice": 6,
+                        "hitBonusAmountOfDice": 4
+                    },
+                    "jaws" : {
+                        "diceSize": 8,
+                        "diceAmount": 1,
+                        "traits": [],
+                        "hitBonusDmgDice": 6,
+                        "hitBonusAmountOfDice": 4
+                    },
+                    "numberOfAvailableAttacks": 2
+                }
+            },
+            "animal": {
+                "accessLevel": 3,
+                "shapes" : {
+                    "ape" : {
+                        "fist": {
+                            "diceSize": 6,
+                            "diceAmount": 2
+                        }
+                    },
+                    "bear" : {
+                        "jaws": {
+                            "diceSize": 8,
+                            "diceAmount": 2
+                        },
+                        "claws": {
+                            "diceSize": 8,
+                            "diceAmount": 1,
+                            "traits": [
+                                "agile"
+                            ]
+                        }
+                    },
+                    "bull" : {
+                        "horn": {
+                            "diceSize": 8,
+                            "diceAmount": 2
+                        }
+                    },
+                    "canine" : {
+                        "jaws": {
+                            "diceSize": 8,
+                            "diceAmount": 2
+                        }
+                    },
+                    "cat" : {
+                        "jaws": {
+                            "diceSize": 6,
+                            "diceAmount": 2
+                        },
+                        "claws": {
+                            "diceSize": 10,
+                            "diceAmount": 1,
+                            "traits": [
+                                "agile"
+                            ]
+                        }
+                    },
+                    "deer" : {
+                        "antler": {
+                            "diceSize": 6,
+                            "diceAmount": 2
+                        }
+                    },
+                    "frog" : {
+                        "fist": {
+                            "diceSize": 6,
+                            "diceAmount": 2
+                        },
+                        "tounge": {
+                            "diceSize": 4,
+                            "diceAmount": 2
+                        }
+                    },
+                    "shark" : {
+                        "jaws": {
+                            "diceSize": 8,
+                            "diceAmount": 2
+                        }
+                    },
+                    "snake" : {
+                        "fangs": {
+                            "diceSize": 4,
+                            "diceAmount": 2,
+                            "hitBonusDmgDice": 6,
+                            "hitBonusAmountOfDice": 1
+                        }
+                    }
+                },
+                "3" : {
+                    "attackModifier": 9,
+                    "damageBonus": 1
+                },
+                "5" : {
+                    "attackModifier": 14,
+                    "damageBonus": 5
+                },
+                "7" : {
+                    "attackModifier": 16,
+                    "damageBonus": 9
+                },
+                "9" : {
+                    "attackModifier": 18,
+                    "damageBonus": 7
+                }
+            },
+            "insect": {
+                "accessLevel": 5,
+                "shapes": {
+                    "ant" : {
+                        "mandibles": {
+                            "diceSize": 6,
+                            "diceAmount": 2
+                        }
+                    },
+                    "beetle" : {
+                        "mandibles": {
+                            "diceSize": 10,
+                            "diceAmount": 2
+                        }
+                    },
+                    "centipede" : {
+                        "mandibles": {
+                            "diceSize": 8,
+                            "diceAmount": 1,
+                            "hitBonusDmgDice": 4,
+                            "hitBonusAmountOfDice": 1
+                        }
+                    },
+                    "mantis" : {
+                        "foreleg": {
+                            "diceSize": 8,
+                            "diceAmount": 2
+                        }
+                    },
+                    "scorpion" : {
+                        "sting": {
+                            "diceSize": 8,
+                            "diceAmount": 1,
+                            "hitBonusDmgDice": 4,
+                            "hitBonusAmountOfDice": 1
+                        },
+                        "pincers": {
+                            "diceSize": 6,
+                            "diceAmount": 1,
+                            "traits": [
+                                "agile"
+                            ]
+                        }
+                    },
+                    "spider" : {
+                        "fangs": {
+                            "diceSize": 6,
+                            "diceAmount": 1,
+                            "hitBonusDmgDice": 4,
+                            "hitBonusAmountOfDice": 1
+                        }
+                    }
+                },
+                "5" : {
+                    "attackModifier": 13,
+                    "damageBonus": 2
+                },
+                "7" : {
+                    "attackModifier": 16,
+                    "damageBonus": 6
+                },
+                "9" : {
+                    "attackModifier": 18,
+                    "damageBonus": 2,
+                    "doubleDice": true
+                }
+            },
+            "dinosaur": {
+                "accessLevel": 7,
+                "shapes": {
+                    "ankylosaurus" : {
+                        "tail": {
+                            "diceSize": 6,
+                            "diceAmount": 2
+                        },
+                        "foot": {
+                            "diceSize": 6,
+                            "diceAmount": 2
+                        }
+                    },
+                    "brontosaurus " : {
+                        "tail": {
+                            "diceSize": 6,
+                            "diceAmount": 2
+                        },
+                        "foot": {
+                            "diceSize": 8,
+                            "diceAmount": 2
+                        }
+                    },
+                    "deinonychus" : {
+                        "talon": {
+                            "diceSize": 4,
+                            "diceAmount": 2,
+                            "traits": [
+                                "agile"
+                            ],
+                            "hitBonusDmg": 1
+                        },
+                        "jaws": {
+                            "diceSize": 10,
+                            "diceAmount": 1
+                        }
+                    },
+                    "stegosaurus" : {
+                        "tail": {
+                            "diceSize": 8,
+                            "diceAmount": 2
+                        }
+                    },
+                    "triceratops" : {
+                        "horn": {
+                            "diceSize": 8,
+                            "diceAmount": 2,
+                            "criticalBonusDmgDice": 6,
+                            "criticalBonusAmountOfDice": 1
+                        },
+                        "foot": {
+                            "diceSize": 6,
+                            "diceAmount": 2
+                        }
+                    },
+                    "tyrannosaurus" : {
+                        "jaws": {
+                            "diceSize": 12,
+                            "diceAmount": 1,
+                            "deadlyDiceSize": 12,
+                            "deadlyAmountOfDice": 1
+                        },
+                        "tail": {
+                            "diceSize": 10,
+                            "diceAmount": 1
+                        }
+                    }
+                },
+                "7" : {
+                    "attackModifier": 16,
+                    "damageBonus": 9
+                },
+                "9" : {
+                    "attackModifier": 18,
+                    "damageBonus": 6,
+                    "doubleDice": true
+                },
+                "13" : {
+                    "attackModifier": 25,
+                    "damageBonus": 15,
+                    "doubleDice": true
+                }
+            },
+            "aerial": {
+                "accessLevel": 7,
+                "shapes": {
+                    "bat" : {
+                        "fangs": {
+                            "diceSize": 8,
+                            "diceAmount": 2
+                        },
+                        "wing": {
+                            "diceSize": 6,
+                            "diceAmount": 2,
+                            "traits": [
+                                "agile"
+                            ]
+                        }
+                    },
+                    "bird" : {
+                        "beak": {
+                            "diceSize": 8,
+                            "diceAmount": 2
+                        },
+                        "talon": {
+                            "diceSize": 10,
+                            "diceAmount": 1,
+                            "traits": [
+                                "agile"
+                            ]
+                        }
+                    },
+                    "pterosaur" : {
+                        "beak": {
+                            "diceSize": 6,
+                            "diceAmount": 3
+                        }
+                    },
+                    "wasp" : {
+                        "fangs": {
+                            "diceSize": 8,
+                            "diceAmount": 1,
+                            "hitBonusDmgDice": 6,
+                            "hitBonusAmountOfDice": 1
+                        }
+                    }
+                },
+                "7" : {
+                    "attackModifier": 16,
+                    "damageBonus": 5
+                },
+                "9" : {
+                    "attackModifier": 18,
+                    "damageBonus": 8
+                },
+                "11" : {
+                    "attackModifier": 21,
+                    "damageBonus": 4,
+                    "doubleDice": true
+                }
+            },
+            "elemental": {
+                "accessLevel": 9,
+                "shapes": {
+                    "air" : {
+                        "gust": {
+                            "diceSize": 4,
+                            "diceAmount": 1
+                        }
+                    },
+                    "earth " : {
+                        "fist": {
+                            "diceSize": 10,
+                            "diceAmount": 2
+                        }
+                    },
+                    "fire" : {
+                        "tendril": {
+                            "diceSize": 8,
+                            "diceAmount": 1,
+                            "hitBonusDmgDice": 4,
+                            "hitBonusAmountOfDice": 1
+                        }
+                    },
+                    "water" : {
+                        "wave": {
+                            "diceSize": 12,
+                            "diceAmount": 1
+                        }
+                    }
+                },
+                "9" : {
+                    "attackModifier": 18,
+                    "damageBonus": 9
+                },
+                "11" : {
+                    "attackModifier": 23,
+                    "damageBonus": 13
+                },
+                "13" : {
+                    "attackModifier": 25,
+                    "damageBonus": 11,
+                    "doubleDice": true
+                }
+            },
+            "plant": {
+                "accessLevel": 9,
+                "shapes": {
+                    "arboreal" : {
+                        "branch": {
+                            "diceSize": 10,
+                            "diceAmount": 2
+                        },
+                        "foot": {
+                            "diceSize": 8,
+                            "diceAmount": 2
+                        }
+                    },
+                    "flytrap" : {
+                        "leaf": {
+                            "diceSize": 8,
+                            "diceAmount": 2
+                        }
+                    },
+                    "shambler" : {
+                        "vine": {
+                            "diceSize": 8,
+                            "diceAmount": 2
+                        }
+                    }
+                },
+                "9" : {
+                    "attackModifier": 18,
+                    "damageBonus": 8
+                },
+                "11" : {
+                    "attackModifier": 21,
+                    "damageBonus": 16
+                }
+            },
+            "dragon": {
+                "accessLevel": 11,
+                "shapes": {
+                    "black" : {
+                        "jaws": {
+                            "diceSize": 12,
+                            "diceAmount": 2,
+                            "hitBonusDmgDice": 6,
+                            "hitBonusAmountOfDice": 2
+                        },
+                        "claws": {
+                            "diceSize": 10,
+                            "diceAmount": 3,
+                            "traits": [
+                                "agile"
+                            ]
+                        },
+                        "tail": {
+                            "diceSize": 10,
+                            "diceAmount": 3
+                        },
+                        "horns": {
+                            "diceSize": 8,
+                            "diceAmount": 3
+                        }
+                    },
+                    "blue" : {
+                        "jaws": {
+                            "diceSize": 12,
+                            "diceAmount": 2,
+                            "hitBonusDmgDice": 12,
+                            "hitBonusAmountOfDice": 1
+                        },
+                        "claws": {
+                            "diceSize": 10,
+                            "diceAmount": 3,
+                            "traits": [
+                                "agile"
+                            ]
+                        },
+                        "tail": {
+                            "diceSize": 10,
+                            "diceAmount": 3
+                        },
+                        "horns": {
+                            "diceSize": 8,
+                            "diceAmount": 3
+                        }
+                    },
+                    "brass" : {
+                        "jaws": {
+                            "diceSize": 8,
+                            "diceAmount": 3,
+                            "hitBonusDmgDice": 4,
+                            "hitBonusAmountOfDice": 2
+                        },
+                        "claws": {
+                            "diceSize": 10,
+                            "diceAmount": 3,
+                            "traits": [
+                                "agile"
+                            ]
+                        },
+                        "tail": {
+                            "diceSize": 10,
+                            "diceAmount": 3
+                        },
+                        "spikes": {
+                            "diceSize": 8,
+                            "diceAmount": 3
+                        }
+                    },
+                    "bronze" : {
+                        "jaws": {
+                            "diceSize": 10,
+                            "diceAmount": 2,
+                            "hitBonusDmgDice": 12,
+                            "hitBonusAmountOfDice": 1
+                        },
+                        "claws": {
+                            "diceSize": 10,
+                            "diceAmount": 3,
+                            "traits": [
+                                "agile"
+                            ]
+                        },
+                        "tail": {
+                            "diceSize": 10,
+                            "diceAmount": 3
+                        },
+                        "wing": {
+                            "diceSize": 8,
+                            "diceAmount": 3
+                        }
+                    },
+                    "copper" : {
+                        "jaws": {
+                            "diceSize": 12,
+                            "diceAmount": 2,
+                            "hitBonusDmgDice": 6,
+                            "hitBonusAmountOfDice": 2
+                        },
+                        "claws": {
+                            "diceSize": 10,
+                            "diceAmount": 3,
+                            "traits": [
+                                "agile"
+                            ]
+                        },
+                        "tail": {
+                            "diceSize": 10,
+                            "diceAmount": 3
+                        },
+                        "wing": {
+                            "diceSize": 8,
+                            "diceAmount": 3
+                        }
+                    },
+                    "gold" : {
+                        "jaws": {
+                            "diceSize": 12,
+                            "diceAmount": 2,
+                            "hitBonusDmgDice": 6,
+                            "hitBonusAmountOfDice": 2
+                        },
+                        "claws": {
+                            "diceSize": 6,
+                            "diceAmount": 4,
+                            "traits": [
+                                "agile"
+                            ]
+                        },
+                        "tail": {
+                            "diceSize": 10,
+                            "diceAmount": 3
+                        },
+                        "horns": {
+                            "diceSize": 8,
+                            "diceAmount": 3
+                        }
+                    },
+                    "green" : {
+                        "jaws": {
+                            "diceSize": 12,
+                            "diceAmount": 2,
+                            "hitBonusDmgDice": 6,
+                            "hitBonusAmountOfDice": 2
+                        },
+                        "claws": {
+                            "diceSize": 10,
+                            "diceAmount": 3,
+                            "traits": [
+                                "agile"
+                            ]
+                        },
+                        "tail": {
+                            "diceSize": 10,
+                            "diceAmount": 3
+                        },
+                        "horns": {
+                            "diceSize": 8,
+                            "diceAmount": 3
+                        }
+                    },
+                    "red" : {
+                        "jaws": {
+                            "diceSize": 12,
+                            "diceAmount": 2,
+                            "hitBonusDmgDice": 6,
+                            "hitBonusAmountOfDice": 2
+                        },
+                        "claws": {
+                            "diceSize": 6,
+                            "diceAmount": 4,
+                            "traits": [
+                                "agile"
+                            ]
+                        },
+                        "tail": {
+                            "diceSize": 10,
+                            "diceAmount": 3
+                        },
+                        "wing": {
+                            "diceSize": 8,
+                            "diceAmount": 3
+                        }
+                    },
+                    "silver" : {
+                        "jaws": {
+                            "diceSize": 12,
+                            "diceAmount": 2,
+                            "hitBonusDmgDice": 6,
+                            "hitBonusAmountOfDice": 2
+                        },
+                        "claws": {
+                            "diceSize": 10,
+                            "diceAmount": 3,
+                            "traits": [
+                                "agile"
+                            ]
+                        },
+                        "tail": {
+                            "diceSize": 10,
+                            "diceAmount": 3
+                        }
+                    },
+                    "white" : {
+                        "jaws": {
+                            "diceSize": 6,
+                            "diceAmount": 3,
+                            "hitBonusDmgDice": 6,
+                            "hitBonusAmountOfDice": 2
+                        },
+                        "claws": {
+                            "diceSize": 10,
+                            "diceAmount": 3,
+                            "traits": [
+                                "agile"
+                            ]
+                        },
+                        "tail": {
+                            "diceSize": 10,
+                            "diceAmount": 3
+                        }
+                    }
+                },
+                "11" : {
+                    "attackModifier": 22,
+                    "damageBonus": 6
+                },
+                "15" : {
+                    "attackModifier": 28,
+                    "damageBonus": 12
+                }
+            },
+            "monstrosity": {
+                "accessLevel": 15,
+                "shapes": {
+                    "phoenix" : {
+                        "beak": {
+                            "diceSize": 6,
+                            "diceAmount": 2,
+                            "bonusDmg": 12,
+                            "hitBonusDmgDice": 4,
+                            "hitBonusAmountOfDice": 4
+                        },
+                        "talon": {
+                            "diceSize": 8,
+                            "diceAmount": 2,
+                            "bonusDmg": 12,
+                            "traits": [
+                                "agile"
+                            ]
+                        }
+                    },
+                    "purple_worm" : {
+                        "jaws": {
+                            "diceSize": 12,
+                            "diceAmount": 2,
+                            "bonusDmg": 20
+                        },
+                        "stinger": {
+                            "diceSize": 8,
+                            "diceAmount": 2,
+                            "bonusDmg": 15,
+                            "hitBonusDmgDice": 6,
+                            "hitBonusAmountOfDice": 2
+                        },
+                        "body": {
+                            "diceSize": 8,
+                            "diceAmount": 2,
+                            "bonusDmg": 20
+                        }
+                    },
+                    "sea_serpent" : {
+                        "jaws": {
+                            "diceSize": 12,
+                            "diceAmount": 2,
+                            "bonusDmg": 20
+                        },
+                        "tail": {
+                            "diceSize": 8,
+                            "diceAmount": 2,
+                            "bonusDmg": 20
+                        }
+                    }
+                },
+                "15" : {
+                    "attackModifier": 28,
+                    "damageBonus": 0
+                },
+                "17" : {
+                    "attackModifier": 31,
+                    "increaseBaseDiceNumber": 1
+                }
+            },
+            "nature_incarnate": {
+                "accessLevel": 19,
+                "shapes": {
+                    "green_man" : {
+                        "vines": {
+                            "diceSize": 8,
+                            "diceAmount": 6,
+                            "bonusDmg": 12
+                        },
+                        "thorns": {
+                            "diceSize": 6,
+                            "diceAmount": 6,
+                            "bonusDmg": 6
+                        }
+                    },
+                    "kaiju" : {
+                        "jaws": {
+                            "diceSize": 10,
+                            "diceAmount": 6,
+                            "bonusDmg": 10
+                        },
+                        "claws": {
+                            "diceSize": 8,
+                            "diceAmount": 6,
+                            "bonusDmg": 8,
+                            "traits": [
+                                "agile"
+                            ]
+                        },
+                        "foot": {
+                            "diceSize": 6,
+                            "diceAmount": 6,
+                            "bonusDmg": 10,
+                            "traits": [
+                                "agile"
+                            ]
+                        }
+                    }
+                },
+                "19" : {
+                    "attackModifier": 34,
+                    "damageBonus": 0
+                }
+            }
+        }
     }
 }

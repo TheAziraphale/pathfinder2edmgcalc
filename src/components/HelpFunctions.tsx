@@ -5,6 +5,17 @@ import PropertyRunes from '../jsons/PropertyRunes.json';
 import { PCState } from './PCClass';
 import { Weapon, WeaponRunes } from './WeaponState';
 import { AttackSelection } from './AttacksChoice';
+import { Form } from './FormChoices';
+
+const getClosestDruidForm = (level:number, druidForms: Form[]) => {
+    let currentForm: Form = undefined;
+
+    if (druidForms && druidForms.length === 10) {
+        return druidForms[Math.max(Math.floor((level - 1) / 2),0)]
+    }
+
+    return currentForm;
+}
 
 export const getTotalHitBonus = (level: number, 
         classChoice: string, 
@@ -12,12 +23,27 @@ export const getTotalHitBonus = (level: number,
         applyPlusHitRunes: boolean,
         hitBonus: number,
         hitAbilityBonus: number,
+        druidForms?: Form[],
     ) => {
 
     if(Classes !== undefined && getClassJson(classChoice, classSpec) !== undefined) {
         const classHitBonus = getClassJson(classChoice, classSpec).hit[level];
         const enchantmentHitBonus = applyPlusHitRunes ? Bonuses['EnchantingBonuses'].hitBonus[level] : 0;
-        return classHitBonus + enchantmentHitBonus + hitAbilityBonus + level + hitBonus;
+        const totalHitChance = classHitBonus + enchantmentHitBonus + hitAbilityBonus + level + hitBonus;
+
+        if (classChoice === 'druid') {
+            const highestAccessedForm = getClosestDruidForm(level, druidForms);
+
+            if (highestAccessedForm && !highestAccessedForm.wildMorph) {
+                if ((highestAccessedForm.attackModifier) < (totalHitChance + 2)) {
+                    return totalHitChance + 2;
+                } else {
+                    return highestAccessedForm.attackModifier;
+                }
+            }
+        } 
+
+        return totalHitChance;
     }
 
     return 0;
@@ -175,7 +201,15 @@ export const getDmgFromWeaponTraits = (weapon: Weapon, level: number, attack?: n
     return weaponBonusDmg;
 }
 
-export const getClassDmg = (currentPCState: PCState, level: number) => {
+export const getClassDmg = (currentPCState: PCState, level: number, attack: number) => {
+    if (currentPCState.classChoice === 'druid') {
+        const highestAccessedForm = getClosestDruidForm(level, currentPCState.druidForms);
+
+        if (highestAccessedForm && !highestAccessedForm.wildMorph) {
+            return highestAccessedForm.damageBonus + (attack === 1 ? highestAccessedForm.primaryAttack.bonusDmg : highestAccessedForm.secondaryAttack.bonusDmg)
+        }
+    } 
+
     const classJson = getClassJson(currentPCState.classChoice, currentPCState.classSpec);
     return classJson.dmg[level]
 }
@@ -187,19 +221,45 @@ export const getAvgDmg = (currentPCState: PCState, weapon: Weapon, crit:boolean,
 
     if (currentPCState.classSpec === 'tiger' && currentPCState.tigerSlash && level >= 6 && crit && attack === 1) {
         numberOfDice += level >= 14 ? 3 : 2;
-        bonusDmg *=2;
+        bonusDmg *= 2;
     }
 
-    bonusDmg += getClassDmg(currentPCState, level);
+    bonusDmg += getClassDmg(currentPCState, level, attack);
     bonusDmg += getClassBonusDmg(currentPCState, level, lastAttack, attack);
     bonusDmg += getDmgFromWeaponTraits(weapon, level, attack);
     bonusDmg += currentPCState.dmgBonus;
 
     const deadlyProgression = Bonuses['DeadlyProgression'].diceAmount[level];
+
+    let currentDiceSize = weapon.dices.diceSize;
+
+    if (currentPCState.classChoice === 'druid') {
+        const highestAccessedForm = getClosestDruidForm(level, currentPCState.druidForms);
+        if (highestAccessedForm) {
+            let currentAttack = attack === 1 ? highestAccessedForm.primaryAttack : highestAccessedForm.secondaryAttack;
+            if (!highestAccessedForm.wildMorph) {
+                numberOfDice = currentAttack.diceAmount;
+                numberOfDice += highestAccessedForm.doubleDices ? numberOfDice : highestAccessedForm.increaseBaseDiceNumber ? 1 : 0;
+                let dmg = ((currentAttack.diceSize/2 + 0.5) * numberOfDice) + currentAttack.bonusDmg + highestAccessedForm.damageBonus;
+                let dmgExtraHit = ((currentAttack.hitBonusDmgDice/2 + 0.5) * (highestAccessedForm.doubleDices ? currentAttack.hitBonusAmountOfDice *2 : currentAttack.hitBonusAmountOfDice));
+
+                if (crit) {
+                    let dmgExtraCrit = (currentAttack.criticalBonusDmgDice/2 + 0.5 * (highestAccessedForm.doubleDices ? currentAttack.criticalBonusAmountOfDice *2 : currentAttack.criticalBonusAmountOfDice));
+                    let dmgExtraDeadly = (currentAttack.deadlyDiceSize/2 + 0.5 * ((highestAccessedForm.doubleDices ? currentAttack.deadlyAmountOfDice *2 : currentAttack.deadlyAmountOfDice)) * deadlyProgression);
+                    return (dmg *2) + dmgExtraHit + dmgExtraDeadly + dmgExtraCrit;
+                } else {
+                    return dmg + dmgExtraHit;
+                }
+            } else if (highestAccessedForm) {
+                currentDiceSize = currentAttack.diceSize.toFixed();
+            }
+        }
+    } 
+
   
     if (crit) {
         let dmg = ((weapon.dices.fatalDiceSize === '-' ? 
-        parseInt(weapon.dices.diceSize)/2 + 0.5 : 
+        parseInt(currentDiceSize)/2 + 0.5 : 
         parseInt(weapon.dices.fatalDiceSize)/2 + 0.5) * numberOfDice + bonusDmg) * 2;
 
         if(weapon.dices.fatalDiceSize !== '-') {
@@ -215,7 +275,7 @@ export const getAvgDmg = (currentPCState: PCState, weapon: Weapon, crit:boolean,
         return dmg;
     } else {
         bonusDmg += getExtraDamageFromPropertyRunes(level, crit, weapon.runes);
-        return (parseInt(weapon.dices.diceSize)/2 + 0.5) * numberOfDice + bonusDmg;
+        return (parseInt(currentDiceSize)/2 + 0.5) * numberOfDice + bonusDmg;
     }
 }
 
@@ -230,6 +290,18 @@ export const getMAP = (currentPCState: PCState, level: number, attackSelection: 
     let mapPenalty = 0;
     const classJson = getClassJson(currentPCState.classChoice, currentPCState.classSpec);
     const weapon = attackSelection.hand === 'off' && currentPCState.offHand !== undefined ? currentPCState.offHand : currentPCState.mainHand;
+    
+    if (currentPCState.classChoice === 'druid') {
+        const highestAccessedForm = getClosestDruidForm(level, currentPCState.druidForms);
+
+        if (highestAccessedForm !== undefined) {
+            if (attackSelection.map === '2') {
+                return highestAccessedForm.secondaryAttack.traits.includes['agile'] ? -4 : -5;
+            } else if (attackSelection.map === '3') {
+                return highestAccessedForm.secondaryAttack.traits.includes['agile'] ? -8 : -10;
+            }
+        }
+    } 
 
     if (attackSelection.map === '2') {
         mapPenalty = (currentPCState.classChoice === 'ranger' && currentPCState.classSpec === 'flurry' && currentPCState.markedTarget ? 
@@ -254,7 +326,7 @@ export const getAttackChances = (currentPCState: PCState, weapon: Weapon, attack
     if ((attack === 1 && currentPCState.classChoice === 'investigator') && currentPCState.deviseAStratagem) {
         hitAbilityBonus = getAbilityBonus(level, currentPCState.stats.intelligence);
     }
-    let totalHitChance = getTotalHitBonus(level, currentPCState.classChoice, currentPCState.classSpec, weapon.runes.hit, currentPCState.hitBonus, hitAbilityBonus);
+    let totalHitChance = getTotalHitBonus(level, currentPCState.classChoice, currentPCState.classSpec, weapon.runes.hit, currentPCState.hitBonus, hitAbilityBonus, currentPCState.druidForms);
 
     if(!currentPCState.ignoreMAP) {
         totalHitChance += getMAP(currentPCState, level, attackSelection);

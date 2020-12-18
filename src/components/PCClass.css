@@ -16,6 +16,11 @@
     margin: 0px;
 }
 
+.formLevelLabel {
+    margin-right: 5px;
+    margin-top: 2px;
+}
+
 .quarterElement {
     width: 90px;
     height: 60px;
@@ -30,6 +35,10 @@
     width: 80px;
 }
 
+.formElementContainer {
+    width: 82px;
+}
+
 .oneSixthElement {
     width: 60px;
 }
@@ -40,7 +49,6 @@
 
 .oneThirdElement {
     width: 125px;
-    height: 60px;
 }
 
 .twoThirdElement {
@@ -60,7 +68,6 @@
 
 .elementContainer {
     width: 390px;
-    height: 56px;
     display: flex;
     flex-wrap: wrap;
     margin-top: -2px;
