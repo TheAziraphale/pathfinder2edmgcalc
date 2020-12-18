@@ -243,6 +243,7 @@ export const getAvgDmg = (currentPCState: PCState, weapon: Weapon, crit:boolean,
     const deadlyProgression = Bonuses['DeadlyProgression'].diceAmount[level];
 
     let currentDiceSize = weapon.dices.diceSize;
+    let extraClassDmg = 0;
 
     if (currentPCState.classChoice === 'druid') {
         const highestAccessedForm = getClosestDruidForm(level, currentPCState.druidForms);
@@ -263,6 +264,7 @@ export const getAvgDmg = (currentPCState: PCState, weapon: Weapon, crit:boolean,
                 }
             } else if (highestAccessedForm) {
                 currentDiceSize = currentAttack.diceSize.toFixed();
+                extraClassDmg = ((currentAttack.hitBonusDmgDice/2 + 0.5) * (highestAccessedForm.doubleDices ? currentAttack.hitBonusAmountOfDice *2 : currentAttack.hitBonusAmountOfDice));
             }
         }
     } 
@@ -283,9 +285,11 @@ export const getAvgDmg = (currentPCState: PCState, weapon: Weapon, crit:boolean,
 
         dmg += getExtraDamageFromPropertyRunes(level, crit, weapon.runes);    
         
+        dmg += extraClassDmg*2;
         return dmg;
     } else {
         bonusDmg += getExtraDamageFromPropertyRunes(level, crit, weapon.runes);
+        bonusDmg += extraClassDmg;
         return (parseInt(currentDiceSize)/2 + 0.5) * numberOfDice + bonusDmg;
     }
 }

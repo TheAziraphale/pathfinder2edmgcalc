@@ -267,10 +267,10 @@ export const FormChoice = (props: FormProps) => {
     }, [currentShapesName]);
 
     useEffect(() => {
-        if (currentPrimaryAttack === undefined) {
+        if (currentPrimaryAttack === undefined || (currentFormName === 'wildmorph' && level < 10)) {
             setCurrentSecondaryAttack(currentPrimaryAttack);
         }
-    }, [currentPrimaryAttack]);
+    }, [currentFormName, currentPrimaryAttack, level]);
 
     const getAttackChoices = (formName: string, shapeName: string, level: number, primary: boolean) => {
         const attacksName:string[] = [];
