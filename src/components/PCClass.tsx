@@ -864,7 +864,7 @@ const PCClass = (props: Props) => {
                                         {cantripSpell !== undefined && cantripSpell.targets > 1 &&
                                             <div className={'oneThirdElement'}>
                                                 <p className={'label'}>Target amount</p>  
-                                                <NumberInput min={1} max={20} value={currentPCState.spellCastingTargetAmount} setValue={setSpellCastingTargetAmount} /> 
+                                                <NumberInput min={1} max={cantripSpell.targets} value={currentPCState.spellCastingTargetAmount} setValue={setSpellCastingTargetAmount} /> 
                                             </div>
                                         }
                                         {cantripSpell !== undefined && cantripSpell.standardEffect.splashDmg > 0 &&
