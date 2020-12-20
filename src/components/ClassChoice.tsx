@@ -8,7 +8,7 @@ interface Props {
 }
 
 interface SpecProps {
-    setSpecChoice: (classChoice: string) => void;
+    setSpecChoice: (specChoice: string) => void;
     classId: string;
     name?: string;
     noLabel?: boolean;
@@ -24,18 +24,36 @@ type ClassTypes = {
     [key: string]: ClassOption
 }
 
+
+const onlyProficiencies = ' (only prof. & w.spec)'
 const classChoices: ClassTypes = {
     '-': {
         id: "-",
         name: "-"
     },
+    'primarySpellcaster': {
+        id: "primarySpellcaster",
+        name: "Primary Spellcaster"
+    },
+    'alchemist': {
+        id: "alchemist",
+        name: "Alchemist" + onlyProficiencies
+    },
     'barbarian': {
         id: "barbarian",
         name: "Barbarian"
     },
+    'bard': {
+        id: "bard",
+        name: "Bard" + onlyProficiencies
+    },
     'champion': {
         id: "champion",
         name: "Champion"
+    },
+    'cleric': {
+        id: "cleric",
+        name: "Cleric" + onlyProficiencies
     },
     'druid': {
         id: "druid",
@@ -53,6 +71,10 @@ const classChoices: ClassTypes = {
         id: "monk",
         name: "Monk"
     },
+    'oracle': {
+        id: "oracle",
+        name: "Oracle (curse, prof, w.spec)"
+    },
     'ranger': {
         id: "ranger",
         name: "Ranger"
@@ -61,10 +83,22 @@ const classChoices: ClassTypes = {
         id: "rogue",
         name: "Rogue"
     },
+    'sorcerer': {
+        id: "sorcerer",
+        name: "Sorcerer" + onlyProficiencies
+    },
     'swashbuckler': {
         id: "swashbuckler",
         name: "Swashbuckler"
-    }
+    },
+    'witch': {
+        id: "witch",
+        name: "Witch" + onlyProficiencies
+    },
+    'wizard': {
+        id: "wizard",
+        name: "Wizard" + onlyProficiencies
+    },
 }
 
 const barbarianSpecs: ClassTypes = {
@@ -87,6 +121,52 @@ const barbarianSpecs: ClassTypes = {
     "spirit": {
         id: "spiritBarbarian",
         name: "Spirit"
+    },
+}
+
+const clericSpecs: ClassTypes = {
+    "cloistered": {
+        id: "cloisteredCleric",
+        name: "Cloistered Cleric"
+    },
+    "warpriest": {
+        id: "warpriestCleric",
+        name: "Warpriest"
+    },
+}
+
+const oracleSpecs: ClassTypes = {
+    "ancestors": {
+        id: "ancestorsOracle",
+        name: "Ancestors (martialStance)"
+    },
+    "battle": {
+        id: "battleOracle",
+        name: "Battle"
+    },
+    "bones": {
+        id: "bonesOracle",
+        name: "Bones"
+    },
+    "cosmos": {
+        id: "cosmosOracle",
+        name: "Cosmos"
+    },
+    "flames": {
+        id: "flamesOracle",
+        name: "Flames"
+    },
+    "life": {
+        id: "lifeOracle",
+        name: "Life"
+    },
+    "lore": {
+        id: "loreOracle",
+        name: "Lore"
+    },
+    "tempest": {
+        id: "tempestOracle",
+        name: "Tempest"
     },
 }
 
@@ -170,7 +250,7 @@ const ClassChoice = (props: Props) => {
                     <p className={'labelName'}>{name}</p>
                 </div>
             )}
-            <select onChange={(event) => { 
+            <select style={{maxWidth: 160}} onChange={(event) => { 
                 setClassChoice(event.target.value)
                 setCurrentClass(event.target.value);
             }}>
@@ -208,6 +288,16 @@ export const SpecChoice = (props: SpecProps) => {
                 {classId === 'barbarian' && Object.keys(barbarianSpecs).map(key => (
                     <option key={key} value={key}>
                         { barbarianSpecs[key].name }
+                    </option>
+                ))}
+                {classId === 'cleric' && Object.keys(clericSpecs).map(key => (
+                    <option key={key} value={key}>
+                        { clericSpecs[key].name }
+                    </option>
+                ))}
+                {classId === 'oracle' && Object.keys(oracleSpecs).map(key => (
+                    <option key={key} value={key}>
+                        { oracleSpecs[key].name }
                     </option>
                 ))}
                 {classId === 'ranger' && Object.keys(rangerSpecs).map(key => (

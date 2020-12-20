@@ -1,0 +1,332 @@
+{
+    "acid_splash" : {
+        "name": "Acid Splash",
+        "school": "Evocation",
+        "range": 30,
+        "targets": 1,
+        "actions": 2,
+        "traditions": [
+            "arcane",
+            "primal"
+        ],
+        "spellAttack" : true,
+        "savingThrow" : false,
+        "savingThrowEffect" : {},
+        "standardEffect": {
+            "diceAmount": 1,
+            "diceSize": 6,
+            "extraCritDmg": 1,
+            "splashDmg": 1,
+            "abilityBoost": false,
+            "extraCritDmgDiceAmount": 0,
+            "extraCritDmgDiceSize": 0
+        },
+        "heightenedEffects" : {
+            "3": {
+                "diceAmount": 1,
+                "diceSize": 6,
+                "extraCritDmg": 2,
+                "splashDmg": 1,
+                "abilityBoost": true
+            },
+            "5": {
+                "diceAmount": 2,
+                "diceSize": 6,
+                "extraCritDmg": 3,
+                "splashDmg": 2,
+                "abilityBoost": true
+            },
+            "7": {
+                "diceAmount": 3,
+                "diceSize": 6,
+                "extraCritDmg": 4,
+                "splashDmg": 3,
+                "abilityBoost": true
+            },
+            "9": {
+                "diceAmount": 4,
+                "diceSize": 6,
+                "extraCritDmg": 5,
+                "splashDmg": 4,
+                "abilityBoost": true
+            }
+        }
+    },
+    "chill_touch" : {
+        "name": "Chill Touch",
+        "school": "Necromancy",
+        "range": 5,
+        "targets": 1,
+        "actions": 2,
+        "traditions": [
+            "arcane",
+            "divine",
+            "occult"
+        ],
+        "spellAttack" : false,
+        "savingThrow" : true,
+        "savingThrowEffect" : {
+            "crit": 0,
+            "success": 0.5,
+            "failure": 1,
+            "critFailure": 2
+        },
+        "standardEffect": {
+            "diceAmount": 1,
+            "diceSize": 4,
+            "extraCritDmg": 0,
+            "splashDmg": 0,
+            "abilityBoost": true,
+            "splashAmountMax": 0,
+            "extraCritDmgDiceAmount": 0,
+            "extraCritDmgDiceSize": 0
+        },
+        "heightenedEffects" : {
+            "+1": {
+                "diceAmount": 1,
+                "diceSize": 4,
+                "extraCritDmgDiceAmount": 0,
+                "extraCritDmgDiceSize": 0
+            }
+        }
+    },
+    "daze" : {
+        "name": "Daze",
+        "school": "Enchantment",
+        "range": 60,
+        "targets": 1,
+        "actions": 2,
+        "traditions": [
+            "arcane",
+            "divine",
+            "occult"
+        ],
+        "spellAttack" : false,
+        "savingThrow" : true,
+        "savingThrowEffect" : {
+            "crit": 0,
+            "success": 0.5,
+            "failure": 1,
+            "critFailure": 2
+        },
+        "standardEffect": {
+            "diceAmount": 0,
+            "diceSize": 0,
+            "extraCritDmg": 0,
+            "splashDmg": 0,
+            "abilityBoost": true,
+            "splashAmountMax": 0,
+            "extraCritDmgDiceAmount": 0,
+            "extraCritDmgDiceSize": 0
+        },
+        "heightenedEffects" : {
+            "+2": {
+                "diceAmount": 1,
+                "diceSize": 6,
+                "extraCritDmgDiceAmount": 0,
+                "extraCritDmgDiceSize": 0
+            }
+        }
+    },
+    "disrupt_undead" : {
+        "name": "Disrupt Undead",
+        "school": "Necromancy",
+        "range": 30,
+        "targets": 1,
+        "actions": 2,
+        "traditions": [
+            "divine",
+            "primal"
+        ],
+        "spellAttack" : false,
+        "savingThrow" : true,
+        "savingThrowEffect" : {
+            "crit": 0,
+            "success": 0.5,
+            "failure": 1,
+            "critFailure": 2
+        },
+        "standardEffect": {
+            "diceAmount": 1,
+            "diceSize": 6,
+            "extraCritDmg": 0,
+            "splashDmg": 0,
+            "abilityBoost": true,
+            "splashAmountMax": 0,
+            "extraCritDmgDiceAmount": 0,
+            "extraCritDmgDiceSize": 0
+        },
+        "heightenedEffects" : {
+            "+1": {
+                "diceAmount": 1,
+                "diceSize": 6,
+                "extraCritDmgDiceAmount": 0,
+                "extraCritDmgDiceSize": 0
+            }
+        }
+    },
+    "divine_lance" : {
+        "name": "Divine Lance",
+        "school": "Evocation",
+        "range": 30,
+        "targets": 1,
+        "actions": 2,
+        "traditions": [
+            "divine"
+        ],
+        "spellAttack" : true,
+        "savingThrow" : false,
+        "savingThrowEffect" : {},
+        "standardEffect": {
+            "diceAmount": 1,
+            "diceSize": 4,
+            "extraCritDmg": 0,
+            "splashDmg": 0,
+            "abilityBoost": true,
+            "splashAmountMax": 0,
+            "extraCritDmgDiceAmount": 0,
+            "extraCritDmgDiceSize": 0
+        },
+        "heightenedEffects" : {
+            "+1": {
+                "diceAmount": 1,
+                "diceSize": 4,
+                "extraCritDmgDiceAmount": 0,
+                "extraCritDmgDiceSize": 0
+            }
+        }
+    },
+    "electric_arc" : {
+        "name": "Electric Arc",
+        "school": "Evocation",
+        "range": 30,
+        "targets": 2,
+        "actions": 2,
+        "traditions": [
+            "arcane",
+            "primal"
+        ],
+        "spellAttack" : false,
+        "savingThrow" : true,
+        "savingThrowEffect" : {
+            "crit": 0,
+            "success": 0.5,
+            "failure": 1,
+            "critFailure": 2
+        },
+        "standardEffect": {
+            "diceAmount": 1,
+            "diceSize": 4,
+            "extraCritDmg": 0,
+            "splashDmg": 0,
+            "abilityBoost": true,
+            "splashAmountMax": 0,
+            "extraCritDmgDiceAmount": 0,
+            "extraCritDmgDiceSize": 0
+        },
+        "heightenedEffects" : {
+            "+1": {
+                "diceAmount": 1,
+                "diceSize": 4,
+                "extraCritDmgDiceAmount": 0,
+                "extraCritDmgDiceSize": 0
+            }
+        }
+    },
+    "produce_flame" : {
+        "name": "Produce Flame",
+        "school": "Evocation",
+        "range": 30,
+        "targets": 1,
+        "actions": 2,
+        "traditions": [
+            "arcane",
+            "primal"
+        ],
+        "spellAttack" : true,
+        "savingThrow" : false,
+        "savingThrowEffect" : {},
+        "standardEffect": {
+            "diceAmount": 1,
+            "diceSize": 4,
+            "extraCritDmg": 0,
+            "splashDmg": 0,
+            "abilityBoost": true,
+            "splashAmountMax": 0,
+            "extraCritDmgDiceAmount": 1,
+            "extraCritDmgDiceSize": 4
+        },
+        "heightenedEffects" : {
+            "+1": {
+                "diceAmount": 1,
+                "diceSize": 6,
+                "extraCritDmgDiceAmount": 1,
+                "extraCritDmgDiceSize": 4
+            }
+        }
+    },
+    "ray_of_frost" : {
+        "name": "Ray of Frost",
+        "school": "Evocation",
+        "range": 120,
+        "targets": 1,
+        "actions": 2,
+        "traditions": [
+            "arcane",
+            "primal"
+        ],
+        "spellAttack" : true,
+        "savingThrow" : false,
+        "savingThrowEffect" : {},
+        "standardEffect": {
+            "diceAmount": 1,
+            "diceSize": 4,
+            "extraCritDmg": 0,
+            "splashDmg": 0,
+            "abilityBoost": true,
+            "splashAmountMax": 0,
+            "extraCritDmgDiceAmount": 0,
+            "extraCritDmgDiceSize": 0
+        },
+        "heightenedEffects" : {
+            "+1": {
+                "diceAmount": 1,
+                "diceSize": 4,
+                "extraCritDmgDiceAmount": 0,
+                "extraCritDmgDiceSize": 0
+            }
+        }
+    },
+    "telekinetic_projectile" : {
+        "name": "Telekinetic Projectile",
+        "school": "Evocation",
+        "range": 30,
+        "targets": 1,
+        "actions": 2,
+        "traditions": [
+            "arcane",
+            "occult"
+        ],
+        "spellAttack" : true,
+        "savingThrow" : false,
+        "savingThrowEffect" : {},
+        "standardEffect": {
+            "diceAmount": 1,
+            "diceSize": 6,
+            "extraCritDmg": 0,
+            "splashDmg": 0,
+            "abilityBoost": true,
+            "splashAmountMax": 0,
+            "extraCritDmgDiceAmount": 0,
+            "extraCritDmgDiceSize": 0
+        },
+        "heightenedEffects" : {
+            "+1": {
+                "diceAmount": 1,
+                "diceSize": 6,
+                "extraCritDmgDiceAmount": 0,
+                "extraCritDmgDiceSize": 0
+            }
+        }
+    }
+}

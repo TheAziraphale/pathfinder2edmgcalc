@@ -6,6 +6,7 @@ import { PCState } from './PCClass';
 import { Weapon, WeaponRunes } from './WeaponState';
 import { AttackSelection } from './AttacksChoice';
 import { Form } from './FormChoices';
+import { Cantrip } from './CantripChoice';
 
 const getClosestDruidForm = (level:number, druidForms: Form[]) => {
     let currentForm: Form = undefined;
@@ -50,9 +51,7 @@ export const getTotalHitBonus = (level: number,
 };
 
 export const getClassJson = (classChoice: string, classSpec: string) => {
-    if (classChoice === 'barbarian') {
-        return Classes[classChoice][classSpec];
-    } else if (classChoice === 'ranger') {
+    if (classChoice === 'barbarian' || classChoice === 'cleric' || classChoice === 'oracle' || classChoice === 'ranger') {
         return Classes[classChoice][classSpec];
     }
 
@@ -120,12 +119,14 @@ export const getExtraDamageFromPropertyRunes = (level:number, crit:boolean, rune
     return extraDmg;
 }
 
-export const getDmgFromAbility = (currentPCState: PCState, weapon: Weapon, level: number ) => {
-    let dmgFromAbility = getAbilityBonus(level, getDamageStat(weapon.traits.finesse, currentPCState.canUseDexForDmg, currentPCState.stats.dexterity, currentPCState.stats.strength));
+export const getDmgFromAbility = (currentPCState: PCState, level: number, weapon?: Weapon, overrideStat?: number) => {
+    let dmgFromAbility = getAbilityBonus(level, overrideStat !== undefined ? overrideStat : getDamageStat(weapon.traits.finesse, currentPCState.canUseDexForDmg, currentPCState.stats.dexterity, currentPCState.stats.strength));
 
-    if (weapon.type === 'Ranged') {
-        dmgFromAbility = weapon.rangedDmgBonus === 'propulsive' ?  Math.floor(dmgFromAbility/2) : weapon.rangedDmgBonus === 'thrown' ? dmgFromAbility : 0;
-    }
+    if(weapon !== undefined) {
+        if (weapon.type === 'Ranged') {
+            dmgFromAbility = weapon.rangedDmgBonus === 'propulsive' ?  Math.floor(dmgFromAbility/2) : weapon.rangedDmgBonus === 'thrown' ? dmgFromAbility : 0;
+        }
+}
 
     return dmgFromAbility;
 }
@@ -225,10 +226,117 @@ export const getClassDmg = (currentPCState: PCState, level: number, attack: numb
     return classJson.dmg[level]
 }
 
+const getSpellLevel = (level:number) => {
+    return Math.ceil(level / 2);
+}
+
+const getEmptySpellEffect = () => {
+    return {
+        diceAmount: 0,
+        diceSize: 0,
+        extraCritDmg: 0,
+        splashDmg: 0,
+        abilityBoost: false,
+        extraCritDmgDiceAmount: 0,
+        extraCritDmgDiceSize: 0,
+    };
+}
+
+const getUpgradedEffect = (normalEffect: any, heightenedEffect: any) => {
+    normalEffect.diceAmount += heightenedEffect.diceAmount !== undefined ? heightenedEffect.diceAmount : normalEffect.diceAmount;
+    normalEffect.diceSize = heightenedEffect.diceSize !== undefined ? heightenedEffect.diceSize : normalEffect.diceSize;
+    normalEffect.extraCritDmg += heightenedEffect.extraCritDmg !== undefined ? heightenedEffect.extraCritDmg : normalEffect.extraCritDmg;
+    normalEffect.splashDmg += heightenedEffect.splashDmg !== undefined ? heightenedEffect.splashDmg : normalEffect.splashDmg;
+    normalEffect.abilityBoost = heightenedEffect.abilityBoost !== undefined ? heightenedEffect.abilityBoost : normalEffect.abilityBoost;
+    normalEffect.extraCritDmgDiceAmount += heightenedEffect.extraCritDmgDiceAmount !== undefined ? heightenedEffect.extraCritDmgDiceAmount : normalEffect.extraCritDmgDiceAmount;
+    normalEffect.extraCritDmgDiceSize = heightenedEffect.extraCritDmgDiceSize !== undefined ? heightenedEffect.extraCritDmgDiceSize : normalEffect.extraCritDmgDiceSize;
+    return normalEffect
+}
+
+export const getBestCantripSpellLevel = (cantripSpell: Cantrip, level:number) => {
+    let bestEffect = JSON.parse(JSON.stringify(cantripSpell.standardEffect)) ;
+    let spellLevel = getSpellLevel(level);
+    let heightenedEffect;
+
+    if (spellLevel > 1) {
+        heightenedEffect = cantripSpell.heightenedEffects['+1'];
+        if (heightenedEffect !== undefined) {
+            for (let i = spellLevel; i > 1; i--) {
+                bestEffect = getUpgradedEffect(bestEffect, heightenedEffect);
+            }
+        } else {
+            heightenedEffect = cantripSpell.heightenedEffects['+2'];
+            if (heightenedEffect !== undefined && spellLevel > 2) {
+                for (let i = spellLevel; i > 2; i -= 2) {
+                    bestEffect = getUpgradedEffect(bestEffect, heightenedEffect);
+                }
+                bestEffect = getUpgradedEffect(bestEffect, heightenedEffect);
+            } else {
+                heightenedEffect = cantripSpell.heightenedEffects['+3'];
+                if (heightenedEffect !== undefined && spellLevel > 3) {
+                    for (let i = spellLevel; i > 3; i -= 3) {
+                        bestEffect = getUpgradedEffect(bestEffect, heightenedEffect);
+                    }
+                } else {
+                    heightenedEffect = cantripSpell.heightenedEffects['+4'];
+                    if (heightenedEffect !== undefined && spellLevel > 4) {
+                        for (let i = spellLevel; i > 4; i -= 4) {
+                            bestEffect = getUpgradedEffect(bestEffect, heightenedEffect);
+                        }
+                    } 
+                }
+            }
+        }
+        
+        if (heightenedEffect === undefined) {
+            //let bestFoundHeighening = druidForms[Math.max(Math.floor((level - 1) / 2),0)]
+            let foundIncrease = false
+            while (spellLevel > 1 && !foundIncrease) {
+                heightenedEffect = cantripSpell.heightenedEffects[spellLevel.toFixed()];
+                if (heightenedEffect !== undefined) {
+                    bestEffect = getUpgradedEffect(getEmptySpellEffect(), heightenedEffect);
+                    foundIncrease = true;
+                }
+                spellLevel --;
+            }
+        }
+    }
+
+    return bestEffect;
+}
+
+export const getAvgSpellDmg = (currentPCState: PCState, cantrip: Cantrip, crit:boolean, level:number, targets: number, splashTargets: number) => {
+    let bestEffect = getBestCantripSpellLevel(cantrip, level);
+    let bonusDmg = bestEffect.abilityBoost ? getDmgFromAbility(currentPCState, level, undefined, currentPCState.stats.spellcastingStat) : 0;
+
+    let splashBonusDmg = bestEffect.splashDmg * splashTargets;
+
+
+    if (crit) {
+        let dmg = ((bestEffect.diceSize/2 + 0.5) * bestEffect.diceAmount + bonusDmg) * 2;
+
+        dmg += splashBonusDmg;
+        dmg += bestEffect.extraCritDmg;
+
+        if (bestEffect.extraCritDmgDiceAmount > 0 && bestEffect.extraCritDmgDiceSize > 0) {
+            dmg += (bestEffect.extraCritDmgDiceSize/2 + 0.5) * bestEffect.extraCritDmgDiceAmount;
+        }
+
+        return dmg * targets;
+    } else {
+        let dmg = (bestEffect.diceSize/2 + 0.5) * bestEffect.diceAmount + bonusDmg;
+        
+        dmg += splashBonusDmg;
+        dmg += bestEffect.extraCritDmg;
+
+        return dmg* targets;
+    }
+}
+
 export const getAvgDmg = (currentPCState: PCState, weapon: Weapon, crit:boolean, level:number, lastAttack?: boolean, attack?: number) => {
 
     let numberOfDice = weapon.runes.striking ? Bonuses['EnchantingBonuses'].striking[level] + 1 : 1;
-    let bonusDmg:number = getDmgFromAbility(currentPCState, weapon, level);
+    let bonusDmg:number = getDmgFromAbility(currentPCState, level, weapon);
 
     if (currentPCState.classSpec === 'tiger' && currentPCState.tigerSlash && level >= 6 && crit && attack === 1) {
         numberOfDice += level >= 14 ? 3 : 2;
@@ -311,9 +419,9 @@ export const getMAP = (currentPCState: PCState, level: number, attackSelection: 
 
         if (highestAccessedForm !== undefined) {
             if (attackSelection.map === '2') {
-                return highestAccessedForm.secondaryAttack.traits.includes['agile'] ? -4 : -5;
+                return highestAccessedForm.secondaryAttack.traits.includes('agile') ? -4 : -5;
             } else if (attackSelection.map === '3') {
-                return highestAccessedForm.secondaryAttack.traits.includes['agile'] ? -8 : -10;
+                return highestAccessedForm.secondaryAttack.traits.includes('agile') ? -8 : -10;
             }
         }
     } 
@@ -331,24 +439,11 @@ export const getMAP = (currentPCState: PCState, level: number, attackSelection: 
     return mapPenalty;
 }
 
-export const getAttackChances = (currentPCState: PCState, weapon: Weapon, attackSelection: AttackSelection, attack: number, level:number, enemyAcMod: number, acJson: any[]) => {
+const getAttackChancesInternal = (difference: number, critRange: number) => {    
     let criticalHitChance: number = 0;
     let hitChance: number = 0;
     let missChance: number = 0;
     let criticalFailureChance: number = 0;
-
-    let hitAbilityBonus = getAbilityBonus(level, getHitStat(weapon.traits.finesse, currentPCState.stats.dexterity, currentPCState.stats.strength, weapon.type));
-    if ((attack === 1 && currentPCState.classChoice === 'investigator') && currentPCState.deviseAStratagem) {
-        hitAbilityBonus = getAbilityBonus(level, currentPCState.stats.intelligence);
-    }
-    let totalHitChance = getTotalHitBonus(level, currentPCState.classChoice, currentPCState.classSpec, weapon.runes.hit, currentPCState.hitBonus, hitAbilityBonus, currentPCState.druidForms);
-
-    if(!currentPCState.ignoreMAP) {
-        totalHitChance += getMAP(currentPCState, level, attackSelection);
-    }
-
-    const enemyAC = acJson[level] + enemyAcMod;
-    const difference:number = totalHitChance - enemyAC;
 
     for(let diceResult = 1; diceResult <= 20; diceResult++) {
         if(difference + diceResult >= 10) {
@@ -359,7 +454,7 @@ export const getAttackChances = (currentPCState: PCState, weapon: Weapon, attack
                 criticalHitChance += 5;
             }
         } else if (difference + diceResult >= 0) {
-            if (diceResult >= weapon.critRange) {
+            if (diceResult >= critRange) {
                 criticalHitChance += 5;
             } if (diceResult === 1) {
                 missChance += 5;
@@ -368,7 +463,7 @@ export const getAttackChances = (currentPCState: PCState, weapon: Weapon, attack
                 hitChance += 5;
             }
         } else if (difference + diceResult >= -10) {
-            if (diceResult >= weapon.critRange) {
+            if (diceResult >= critRange) {
                 hitChance += 5;
             } if (diceResult === 1) {
                 criticalFailureChance += 5;
@@ -377,7 +472,7 @@ export const getAttackChances = (currentPCState: PCState, weapon: Weapon, attack
                 missChance += 5;
             }
         } else {
-            if (diceResult >= weapon.critRange) {
+            if (diceResult >= critRange) {
                 missChance += 5;
             }
             else {
@@ -394,5 +489,42 @@ export const getAttackChances = (currentPCState: PCState, weapon: Weapon, attack
     };
 
     return attackChance;
+}
+
+export const getEnemySaveChance = (currentPCState: PCState, level: number, enemySaveMod: number, saveJson: any[]) => {
+    let saveAbilityBonus = getAbilityBonus(level, currentPCState.stats.spellcastingStat);
+    let enemyTotalCheckChance = saveJson[level] + enemySaveMod;
+
+    const spellDC = 10 + level + saveAbilityBonus + getClassJson(currentPCState.classChoice, currentPCState.classSpec)['spellDC'][level];
+    const difference:number = enemyTotalCheckChance - spellDC;
+    
+    return getAttackChancesInternal(difference, 20);
+}
+
+export const getSpellAttackChance = (currentPCState: PCState, level: number, enemyAcMod: number, acJson: any[], spellcastingCrit: number) => {
+    let hitAbilityBonus = getAbilityBonus(level, currentPCState.stats.spellcastingStat);
+    let totalHitChance = getTotalHitBonus(level, currentPCState.classChoice, currentPCState.classSpec, false, currentPCState.hitBonus, hitAbilityBonus, currentPCState.druidForms);
+
+    const enemyAC = acJson[level] + enemyAcMod;
+    const difference:number = totalHitChance - enemyAC;
+
+    return getAttackChancesInternal(difference, spellcastingCrit);
+}
+
+export const getAttackChances = (currentPCState: PCState, weapon: Weapon, attackSelection: AttackSelection, attack: number, level:number, enemyAcMod: number, acJson: any[]) => {
+    let hitAbilityBonus = getAbilityBonus(level, getHitStat(weapon.traits.finesse, currentPCState.stats.dexterity, currentPCState.stats.strength, weapon.type));
+    if ((attack === 1 && currentPCState.classChoice === 'investigator') && currentPCState.deviseAStratagem) {
+        hitAbilityBonus = getAbilityBonus(level, currentPCState.stats.intelligence);
+    }
+    let totalHitChance = getTotalHitBonus(level, currentPCState.classChoice, currentPCState.classSpec, weapon.runes.hit, currentPCState.hitBonus, hitAbilityBonus, currentPCState.druidForms);
+
+    if(!currentPCState.ignoreMAP) {
+        totalHitChance += getMAP(currentPCState, level, attackSelection);
+    }
+
+    const enemyAC = acJson[level] + enemyAcMod;
+    const difference:number = totalHitChance - enemyAC;
+    
+    return getAttackChancesInternal(difference, weapon.critRange);
 }
 

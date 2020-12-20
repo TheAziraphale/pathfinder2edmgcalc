@@ -9,7 +9,8 @@ import CheckboxButtonInput from './CheckboxButtonInput';
 import { 
     getClassJson, 
     getAvgDmg, 
-    AttackChance, 
+    getAvgSpellDmg,
+    AttackChance,
     getDmgFromAbility, 
     getClassDmg, 
     getClassBonusDmg, 
@@ -20,24 +21,31 @@ import {
     getAbilityBonus,
     getHitStat,
     getPolymorphShape,
+    getSpellAttackChance,
+    getEnemySaveChance,
+    getAttackChances,
+    getBestCantripSpellLevel
 } from './HelpFunctions';
-import { getAttackChances } from './HelpFunctions';
 import AttackChoices, { AttackSelection } from './AttacksChoice';
 import { HuePicker   } from 'react-color';
 import WeaponState, { Weapon, WeaponDices, WeaponRunes, WeaponTraits } from './WeaponState';
+import CantripChoice, { Cantrip } from './CantripChoice';
 
 interface Props {
     id: string;
     color: string;
     setGraphData: (data:any[]) => void;
     acJson: any[];
+    saveJson: any[];
     enemyAcMod?: string;
+    enemySaveMod?: string;
 }
 
 interface Stats {
     strength: number;
     dexterity: number;
     intelligence: number;
+    spellcastingStat: number;
 }
 
 export interface AttackSummary {
@@ -55,6 +63,7 @@ export interface AttackSummary {
     weaponTraitBonusDmg: number;
     untypedBonusDmg: number;
     avgDmgThisAttack: number;
+    spellDC: number;
 }
 
 export interface PCState {
@@ -67,6 +76,9 @@ export interface PCState {
     ignoreMAP: boolean;
     hitBonus: number;
     dmgBonus: number;
+    spellcastingCrit: number;
+    spellCastingTargetAmount: number;
+    spellCastingSplashTargetAmount: number;
     canUseDexForDmg: boolean;
     applySneakDmg: boolean;
     applyPanache: boolean;
@@ -91,17 +103,22 @@ export interface PCState {
 const SwashbucklerFinisherDmgDice = 6;
 
 const PCClass = (props: Props) => {
-    const { id, color, setGraphData, enemyAcMod, acJson } = props;
+    const { id, color, setGraphData, enemyAcMod, enemySaveMod, acJson, saveJson } = props;
     const [currentPCState, setCurrentPCState] = useState<PCState>();
     const [update, forceUpdate] = React.useState({});
     const [classChoice, setClassChoice] = useState<string>('-');
     const [classSpec, setClassSpec] = useState<string>('-');
+    const [cantripSpell, setCantripSpell] = useState<Cantrip>();
     const [strength, setStrength] = useState<number>(18);
     const [dexterity, setDexterity] = useState<number>(18);
     const [intelligence, setIntelligence] = useState<number>(18);
+    const [spellcastingStat, setSpellcastingStat] = useState<number>(18);
     const [amountOfAttacks, setAmountOfAttacks] = useState<number>(1);
     const [hitBonus, setHitBonus] = useState<number>(0);
     const [dmgBonus, setDmgBonus] = useState<number>(0);
+    const [spellcastingCrit, setSpellcastingCrit] = useState<number>(20);
+    const [spellCastingTargetAmount, setSpellCastingTargetAmount] = useState<number>(1);
+    const [spellCastingSplashTargetAmount, setSpellCastingSplashTargetAmount] = useState<number>(1);
     const [canUseDexForDmg, setCanUseDexForDmg] = useState<boolean>(false);
     const [startAtMaxMAP, setStartAtMaxMAP] = useState<boolean>(false);
     const [ignoreMAP, setIgnoreMAP] = useState<boolean>(false);
@@ -189,7 +206,8 @@ const PCClass = (props: Props) => {
         const stats: Stats = {
             strength,
             dexterity,
-            intelligence
+            intelligence,
+            spellcastingStat
         };
         if (!offHand) {
             let newAttackSelections = attackSelections;
@@ -208,6 +226,9 @@ const PCClass = (props: Props) => {
             ignoreMAP,
             hitBonus,
             dmgBonus,
+            spellcastingCrit,
+            spellCastingTargetAmount,
+            spellCastingSplashTargetAmount,
             canUseDexForDmg,
             applySneakDmg,
             applyPanache,
@@ -229,10 +250,10 @@ const PCClass = (props: Props) => {
             attackSelections,
         });
     }, [
-        classChoice, classSpec, strength, dexterity, intelligence, mainHand, offHand, startAtMaxMAP, ignoreMAP, hitBonus,  dmgBonus, 
-        canUseDexForDmg, applySneakDmg, applyPanache,  markedTarget, rage,  deviseAStratagem, retributiveStrike, attackOfOpportunity, 
-        tigerSlash, craneFlutter, dragonRoar, wolfDrag, gorillaPound, gorillaFrightened, stumblingFeint, lastAttackWithFinisher, druidForms,
-        amountOfAttacks, enemyAcMod, acJson, currentColor, attackSelections, update
+        classChoice, classSpec, strength, dexterity, intelligence, spellcastingStat, spellcastingCrit, spellCastingTargetAmount, spellCastingSplashTargetAmount, 
+        mainHand, offHand, startAtMaxMAP, ignoreMAP, hitBonus, dmgBonus, canUseDexForDmg, applySneakDmg, applyPanache,  markedTarget, rage,  deviseAStratagem, 
+        retributiveStrike, attackOfOpportunity, tigerSlash, craneFlutter, dragonRoar, wolfDrag, gorillaPound, gorillaFrightened, stumblingFeint, 
+        lastAttackWithFinisher, druidForms, amountOfAttacks, enemyAcMod, enemySaveMod, acJson, saveJson, currentColor, attackSelections, update, cantripSpell
     ])
 
     useEffect(() => {
@@ -249,12 +270,12 @@ const PCClass = (props: Props) => {
     }, [classSpec, classChoice])
 
     const doesClassHaveASpec = useCallback(() => {
-        if (currentPCState.classChoice === 'barbarian' || currentPCState.classChoice === 'ranger' || currentPCState.classChoice === 'monk') {
+        if (classChoice === 'barbarian' || classChoice === 'oracle' || classChoice === 'cleric' ||  classChoice === 'ranger' || classChoice === 'monk') {
             return true;
         }
 
         return false;
-    }, [currentPCState])
+    }, [classChoice])
 
     useEffect(() => {
         /* Reset values when classChoice is set */
@@ -270,6 +291,10 @@ const PCClass = (props: Props) => {
         setStrength(18);
         setDexterity(18);
         setIntelligence(18);
+        setSpellcastingStat(18);
+        setSpellcastingCrit(20);
+        setSpellCastingTargetAmount(1);
+        setSpellCastingSplashTargetAmount(1);
         setCanUseDexForDmg(false);
         setMainHand(createBaseWeapon());
         if (classChoice === 'monk') {
@@ -326,6 +351,60 @@ const PCClass = (props: Props) => {
     const getClassJsonInternal = useCallback(() => {
         return getClassJson(currentPCState.classChoice, currentPCState.classSpec);
     },[currentPCState])
+    
+    const getSpellSaveSummary = (saveChances: AttackChance, level: number, cantripSpell: Cantrip, avgDmgThisAttack: number) => {
+        let saveAbilityBonus = getAbilityBonus(level, currentPCState.stats.spellcastingStat);
+        const spellDC = 10 + level + saveAbilityBonus + getClassJson(currentPCState.classChoice, currentPCState.classSpec)['spellDC'][level];
+
+        return {
+            weapon: undefined,
+            attackSelection: undefined,
+            attackChances: saveChances,
+            totalHit: undefined,
+            totalDmg: avgDmgThisAttack,
+            extraRuneDmg: undefined,
+            abilityBonusDmg: undefined,
+            abilityBonusHit: undefined,
+            classDmg: undefined,
+            classHit: undefined,
+            classBonusDmg: undefined,
+            weaponTraitBonusDmg: undefined,
+            untypedBonusDmg: undefined,
+            avgDmgThisAttack: avgDmgThisAttack,
+            spellDC: spellDC
+        }
+    }
+
+    const getSpellAttackSummary = (attackChances: AttackChance, level: number, cantripSpell: Cantrip, avgDmgThisAttack: number) => {
+        let hitAbilityBonus = getAbilityBonus(level, currentPCState.stats.spellcastingStat);
+        let totalHitChance = getTotalHitBonus(level, currentPCState.classChoice, currentPCState.classSpec, false, currentPCState.hitBonus, hitAbilityBonus, currentPCState.druidForms);
+        
+        let extraRuneDmg = 0;
+        let bestCantripVersion = getBestCantripSpellLevel(cantripSpell, level);
+        let abilityBonusDmg = bestCantripVersion.abilityBoost ? getDmgFromAbility(currentPCState, level, undefined, currentPCState.stats.spellcastingStat) : 0;
+        let classDmg = 0;
+        let classBonusDmg = 0;
+        let weaponTraitBonusDmg = 0;
+        let untypedBonusDmg = currentPCState.dmgBonus;
+
+        return {
+            weapon: undefined,
+            attackSelection: undefined,
+            attackChances: attackChances,
+            totalHit: totalHitChance,
+            totalDmg: getPolymorphShape(currentPCState, level) ? classDmg : extraRuneDmg + abilityBonusDmg + classDmg + classBonusDmg + weaponTraitBonusDmg + untypedBonusDmg,
+            extraRuneDmg: extraRuneDmg,
+            abilityBonusDmg: abilityBonusDmg,
+            abilityBonusHit: hitAbilityBonus,
+            classDmg: classDmg,
+            classHit: getClassJson(classChoice, classSpec).hit[level],
+            classBonusDmg: classBonusDmg,
+            weaponTraitBonusDmg: weaponTraitBonusDmg,
+            untypedBonusDmg: untypedBonusDmg,
+            avgDmgThisAttack: avgDmgThisAttack,
+            spellDC: undefined
+        }
+    }
 
     const getAttackSummary = (attackChances: AttackChance, level: number, weaponToAttackWith: Weapon, attackSelection: AttackSelection, attack: number, lastAttack: boolean, avgDmgThisAttack: number) => {
         const runeBonusDmg = (attackChances.hitChance / 100) * getExtraDamageFromPropertyRunes(level, false, weaponToAttackWith.runes) + 
@@ -343,13 +422,11 @@ const PCClass = (props: Props) => {
         }
     
         let extraRuneDmg = runeBonusDmg;
-        let abilityBonusDmg = getDmgFromAbility(currentPCState, weaponToAttackWith, level);
+        let abilityBonusDmg = getDmgFromAbility(currentPCState, level, weaponToAttackWith);
         let classDmg = getClassDmg(currentPCState, level, attack);
         let classBonusDmg = getClassBonusDmg(currentPCState, level, lastAttack, attack);
         let weaponTraitBonusDmg = getDmgFromWeaponTraits(weaponToAttackWith, level, attack);
         let untypedBonusDmg = currentPCState.dmgBonus;
-
-        
 
         return {
             weapon: weaponToAttackWith,
@@ -357,7 +434,7 @@ const PCClass = (props: Props) => {
             attackChances: attackChances,
             totalHit: totalHitChance,
             totalDmg: getPolymorphShape(currentPCState, level) ? classDmg : extraRuneDmg + abilityBonusDmg + classDmg + classBonusDmg + weaponTraitBonusDmg + untypedBonusDmg,
-            extraRuneDmg: runeBonusDmg,
+            extraRuneDmg: extraRuneDmg,
             abilityBonusDmg: abilityBonusDmg,
             abilityBonusHit: hitAbilityBonus,
             classDmg: classDmg,
@@ -366,6 +443,7 @@ const PCClass = (props: Props) => {
             weaponTraitBonusDmg: weaponTraitBonusDmg,
             untypedBonusDmg: untypedBonusDmg,
             avgDmgThisAttack: avgDmgThisAttack,
+            spellDC: undefined
         }
     }
 
@@ -379,54 +457,81 @@ const PCClass = (props: Props) => {
             let totalAmountOfDmg = 0;
             const attackSummary: AttackSummary[] = [];
 
-            for(let attack = 1; attack <= amountOfAttacks; attack++) {
+            if (classChoice === 'primarySpellcaster' && cantripSpell !== undefined) {
+                // console.log("inside", cantripSpell);
+                if (cantripSpell.savingThrow) {
+                    const saveChances = getEnemySaveChance(currentPCState, level, parseInt(enemySaveMod), saveJson);
+                    
+                    let fullDmg = getAvgSpellDmg(currentPCState, cantripSpell, false, level, spellCastingTargetAmount, spellCastingSplashTargetAmount)
 
-                let attackSelection = attackSelections[attack - 1];
-                let weaponToAttackWith = attackSelections[attack - 1].hand === 'main' ? mainHand : offHand;
-                
-                // console.log(weaponToAttackWith);
-                if (level >= 6 && classSpec === 'wolf' && wolfDrag) {
-                    weaponToAttackWith = createBaseWeapon('12');
+                    /* in a hit, it's halved rounded down, meaning you will lose 0.25 dmg from each save success */
+                    let thisAttackDmg = (saveChances.hitChance / 100) * (fullDmg * 0.5 - 0.25);
+                    thisAttackDmg += (saveChances.missChance / 100) * fullDmg;
+                    thisAttackDmg += (saveChances.criticalFailureChance / 100) * fullDmg * 2;
+
+                    attackSummary.push(getSpellSaveSummary(saveChances, level, cantripSpell, thisAttackDmg))
+                    totalAmountOfDmg += thisAttackDmg;
+                    
+                } else if (cantripSpell.spellAttack) {
+                    const attackChances = getSpellAttackChance(currentPCState, level, parseInt(enemyAcMod), acJson, spellcastingCrit);
+                    
+                    let thisAttackDmg = (attackChances.hitChance / 100) * getAvgSpellDmg(currentPCState, cantripSpell, false, level, spellCastingTargetAmount, spellCastingSplashTargetAmount);
+                    thisAttackDmg += (attackChances.criticalHitChance / 100) * getAvgSpellDmg(currentPCState, cantripSpell, true, level, spellCastingTargetAmount, spellCastingSplashTargetAmount);
+
+                    attackSummary.push(getSpellAttackSummary(attackChances, level, cantripSpell, thisAttackDmg))
+                    totalAmountOfDmg += thisAttackDmg;
                 }
+            } else {
 
-                // only used for monk stumbling stance at the moment
-                let flatFootedValue = 0;
-                if (level >= 6 && classSpec === 'stumbling' && stumblingFeint && attack <= 2) {
-                    flatFootedValue = 2;
+                for(let attack = 1; attack <= amountOfAttacks; attack++) {
+
+                    let attackSelection = attackSelections[attack - 1];
+                    let weaponToAttackWith = attackSelections[attack - 1].hand === 'main' ? mainHand : offHand;
+                    
+                    // console.log(weaponToAttackWith);
+                    if (level >= 6 && classSpec === 'wolf' && wolfDrag) {
+                        weaponToAttackWith = createBaseWeapon('12');
+                    }
+
+                    // only used for monk stumbling stance at the moment
+                    let flatFootedValue = 0;
+                    if (level >= 6 && classSpec === 'stumbling' && stumblingFeint && attack <= 2) {
+                        flatFootedValue = 2;
+                    }
+
+                    const attackChances = getAttackChances(currentPCState, weaponToAttackWith, attackSelection, attack, level, parseInt(enemyAcMod) - flatFootedValue, acJson);
+                    const lastAttack = attack === amountOfAttacks;
+
+
+                    let thisAttackDmg = (attackChances.hitChance / 100) * getAvgDmg(currentPCState, weaponToAttackWith, false, level, lastAttack, attack);
+                    thisAttackDmg += (attackChances.criticalHitChance / 100) * getAvgDmg(currentPCState, weaponToAttackWith, true, level, lastAttack, attack);
+                    
+                    let reactionExtraDmg = 0;
+                    if (attack === 1 && ((classChoice === 'champion' && retributiveStrike) || (classChoice === 'fighter' && attackOfOpportunity))) {
+                        /* Symbolizes a free extra attack with reaction */
+                        reactionExtraDmg = thisAttackDmg;
+                    } else if (attack === 1 && classSpec === 'crane' && craneFlutter) {
+                        /* Symbolizes a free extra attack with reaction */
+                        const attackFlutterChances = getAttackChances(currentPCState, weaponToAttackWith, attackSelection, attack, level, parseInt(enemyAcMod) + 2, acJson);
+                        reactionExtraDmg = (attackFlutterChances.hitChance / 100) * getAvgDmg(currentPCState, weaponToAttackWith, false, level, lastAttack, attack);
+                        reactionExtraDmg += (attackFlutterChances.criticalHitChance / 100) * getAvgDmg(currentPCState, weaponToAttackWith, true, level, lastAttack, attack);
+                    }
+                    thisAttackDmg += reactionExtraDmg;
+
+                    let swashbucklerFinisherDmg = 0;
+                    if (classChoice === 'swashbuckler' && applyPanache && lastAttackWithFinisher && lastAttack) {
+                        swashbucklerFinisherDmg = ((attackChances.missChance / 100) * (SwashbucklerFinisherDmgDice/2 + 0.5) * getClassJsonInternal().panacheBonus[level]) / 2;
+                    }
+                    thisAttackDmg += swashbucklerFinisherDmg;
+
+                    attackSummary.push(getAttackSummary(attackChances, level, weaponToAttackWith, attackSelection, attack, lastAttack, thisAttackDmg))
+
+                    if (level >= 6 && attack === 2 && classSpec === 'tiger' && tigerSlash) {
+                        thisAttackDmg = 0;
+                    }
+
+                    totalAmountOfDmg += thisAttackDmg;
                 }
-
-                const attackChances = getAttackChances(currentPCState, weaponToAttackWith, attackSelection, attack, level, parseInt(enemyAcMod) - flatFootedValue, acJson);
-                const lastAttack = attack === amountOfAttacks;
-
-
-                let thisAttackDmg = (attackChances.hitChance / 100) * getAvgDmg(currentPCState, weaponToAttackWith, false, level, lastAttack, attack);
-                thisAttackDmg += (attackChances.criticalHitChance / 100) * getAvgDmg(currentPCState, weaponToAttackWith, true, level, lastAttack, attack);
-                
-                let reactionExtraDmg = 0;
-                if (attack === 1 && ((classChoice === 'champion' && retributiveStrike) || (classChoice === 'fighter' && attackOfOpportunity))) {
-                    /* Symbolizes a free extra attack with reaction */
-                    reactionExtraDmg = thisAttackDmg;
-                } else if (attack === 1 && classSpec === 'crane' && craneFlutter) {
-                    /* Symbolizes a free extra attack with reaction */
-                    const attackFlutterChances = getAttackChances(currentPCState, weaponToAttackWith, attackSelection, attack, level, parseInt(enemyAcMod) + 2, acJson);
-                    reactionExtraDmg = (attackFlutterChances.hitChance / 100) * getAvgDmg(currentPCState, weaponToAttackWith, false, level, lastAttack, attack);
-                    reactionExtraDmg += (attackFlutterChances.criticalHitChance / 100) * getAvgDmg(currentPCState, weaponToAttackWith, true, level, lastAttack, attack);
-                }
-                thisAttackDmg += reactionExtraDmg;
-
-                let swashbucklerFinisherDmg = 0;
-                if (classChoice === 'swashbuckler' && applyPanache && lastAttackWithFinisher && lastAttack) {
-                    swashbucklerFinisherDmg = ((attackChances.missChance / 100) * (SwashbucklerFinisherDmgDice/2 + 0.5) * getClassJsonInternal().panacheBonus[level]) / 2;
-                }
-                thisAttackDmg += swashbucklerFinisherDmg;
-
-                attackSummary.push(getAttackSummary(attackChances, level, weaponToAttackWith, attackSelection, attack, lastAttack, thisAttackDmg))
-
-                if (level >= 6 && attack === 2 && classSpec === 'tiger' && tigerSlash) {
-                    thisAttackDmg = 0;
-                }
-
-                totalAmountOfDmg += thisAttackDmg;
             }
             attackData.push(totalAmountOfDmg);
             attacksSummary.push(attackSummary);
@@ -477,6 +582,10 @@ const PCClass = (props: Props) => {
                                     setClassSpec("animal");
                                 } else if (val === 'monk') {
                                     setClassSpec("custom");
+                                } else if (val === 'cleric') {
+                                    setClassSpec("cloistered");
+                                } else if (val === 'oracle') {
+                                    setClassSpec("ancestors");
                                 } else if (val === 'ranger') {
                                     setClassSpec("flurry");
                                 } else {
@@ -489,6 +598,8 @@ const PCClass = (props: Props) => {
                                 <p className={'label'}>{classChoice === 'barbarian' ? 'Choose instinct' : 
                                                         classChoice === 'monk' ? 'Choose stance' : 
                                                         classChoice === 'ranger' ? "Choose hunter's edge" : 
+                                                        classChoice === 'cleric' ? "Choose doctrine" : 
+                                                        classChoice === 'oracle' ? "Choose mystery" : 
                                                         'Choose spec'}</p>                
                                 <SpecChoice setSpecChoice={setClassSpec} classId={currentPCState.classChoice} noLabel={true} />
                             </div>
@@ -510,14 +621,24 @@ const PCClass = (props: Props) => {
                         </div>
                         <div className={'elementWrapper'}>
                             <div className={'elementContainer'}>
+                                {  classChoice !== 'primarySpellcaster' &&
                                 <div className={'quarterElement'} >
                                     <p className={'label'}>Strength</p>                
                                     <NumberInput min={8} max={18} value={currentPCState.stats.strength} setValue={setStrength} /> 
                                 </div>
+                                }
+                                { classChoice !== 'primarySpellcaster' &&
                                 <div className={'quarterElement'}>
                                     <p className={'label'}>Dexterity</p>                
                                     <NumberInput min={8} max={18} value={currentPCState.stats.dexterity} setValue={setDexterity} /> 
                                 </div>
+                                }
+                                { classChoice === 'primarySpellcaster' &&
+                                    <div className={'quarterElement'}>
+                                        <p className={'label'}>Casting Stat</p>                
+                                        <NumberInput min={8} max={18} value={currentPCState.stats.spellcastingStat} setValue={setSpellcastingStat} /> 
+                                    </div>
+                                }
                                 {classChoice === 'investigator' && (  
                                     <div className={'quarterElement'}>
                                         <p className={'label'}>Intelligence</p>                
@@ -643,8 +764,10 @@ const PCClass = (props: Props) => {
                                 }
                             </div>
                         </div>
-                        <WeaponState currentPCState={currentPCState} weapon={mainHand} label={classChoice === 'druid' ? 'Wildmorph wraps runes' : offHand === undefined ? 'Weapon' : 'Main hand'} setWeapon={setMainHand} pcId={id + '_mainHand'} />
-                        {(classChoice === 'monk' && classSpec !== 'custom') || classChoice === 'druid' ? (
+                        { classChoice !== 'primarySpellcaster' &&
+                            <WeaponState currentPCState={currentPCState} weapon={mainHand} label={classChoice === 'druid' ? 'Wildmorph wraps runes' : offHand === undefined ? 'Weapon' : 'Main hand'} setWeapon={setMainHand} pcId={id + '_mainHand'} />
+                        }
+                         {(classChoice === 'monk' && classSpec !== 'custom') || classChoice === 'druid' || classChoice === 'primarySpellcaster' ? (
                             <div></div>
                         ) : offHand !== undefined ? (
                             <WeaponState currentPCState={currentPCState} buttonCommand={() => { setOffHand(undefined) }} weapon={offHand} label={'Off hand'} setWeapon={setOffHand} pcId={id + '_offHand'} />
@@ -663,48 +786,97 @@ const PCClass = (props: Props) => {
                             </div>
                         )
                         }
-                        <div className={'labelElement'}>
-                            <p className={'labelHeader'}>Attacks and extra</p>   
-                        </div>
-                        <div className={'elementWrapper'}>
-                            <div className={'elementContainer'}>
-                                <div className={'oneThirdElement'} style={{width: 140}} >
-                                    <p className={'label'}>Number of attacks</p>                
-                                    <NumberInput min={tigerSlash ? 2 : 1} max={10} value={currentPCState.amountOfAttacks} setValue={setAmountOfAttacks} /> 
+                        { classChoice !== 'primarySpellcaster' &&
+                            <div>
+                                <div className={'labelElement'}>
+                                    <p className={'labelHeader'}>Attacks and extra</p>   
                                 </div>
-                                <div className={'twoFifthElement'}>
-                                    <p className={'label'}>Bonus to hit</p>  
-                                    <NumberInput min={-20} max={20} value={currentPCState.hitBonus} setValue={setHitBonus} /> 
-                                 </div>
-                                <div className={'oneThirdElement'}>
-                                    <p className={'label'}>Bonus to damage</p>  
-                                    <NumberInput min={-20} max={20} value={currentPCState.dmgBonus} setValue={setDmgBonus} /> 
-                                 </div>
+                                <div className={'elementWrapper'}>
+                                    <div className={'elementContainer'}>
+                                        <div className={'oneThirdElement'} style={{width: 140}} >
+                                            <p className={'label'}>Number of attacks</p>                
+                                            <NumberInput min={tigerSlash ? 2 : 1} max={10} value={currentPCState.amountOfAttacks} setValue={setAmountOfAttacks} /> 
+                                        </div>
+                                        <div className={'twoFifthElement'}>
+                                            <p className={'label'}>Bonus to hit</p>  
+                                            <NumberInput min={-20} max={20} value={currentPCState.hitBonus} setValue={setHitBonus} /> 
+                                        </div>
+                                        <div className={'oneThirdElement'}>
+                                            <p className={'label'}>Bonus to damage</p>  
+                                            <NumberInput min={-20} max={20} value={currentPCState.dmgBonus} setValue={setDmgBonus} /> 
+                                        </div>
+                                    </div>
+                                    <AttackChoices setAttackSelections={(value: AttackSelection[]) => {
+                                        setAttackSelections(value);
+                                        forceUpdate({});
+                                    }} currentPCState={currentPCState} haveOffHand={offHand !== undefined} attackSelections={attackSelections} ignoreMap={ignoreMAP} alwaysMaxMap={startAtMaxMAP} />
+                                    <div className={'elementContainer'} style={{height: 25}}>
+                                        <div style={{marginRight: 5}}>
+                                        <CheckboxButtonInput value={currentPCState.startAtMaxMAP} setValue={(val:boolean) => {
+                                                setStartAtMaxMAP(val)
+                                                if (val) {
+                                                    setIgnoreMAP(false);
+                                                }
+                                            }} label={'Always max MAP'} id={'checkbox_max_map' + id} />
+                                        </div>
+                                        <div>
+                                            
+                                        <CheckboxButtonInput value={currentPCState.ignoreMAP} setValue={(val:boolean) => {
+                                                setIgnoreMAP(val)
+                                                if (val) {
+                                                    setStartAtMaxMAP(false);
+                                                }
+                                            }} label={'Ignore MAP'} id={'checkbox_ignore_map' + id} />
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                            <AttackChoices setAttackSelections={(value: AttackSelection[]) => {
-                                setAttackSelections(value);
-                                forceUpdate({});
-                            }} currentPCState={currentPCState} haveOffHand={offHand !== undefined} attackSelections={attackSelections} ignoreMap={ignoreMAP} alwaysMaxMap={startAtMaxMAP} />
-                            <div className={'elementContainer'} style={{height: 25}}>
-                                <div style={{marginRight: 5}}>
-                                <CheckboxButtonInput value={currentPCState.startAtMaxMAP} setValue={(val:boolean) => {
-                                        setStartAtMaxMAP(val)
-                                        if (val) {
-                                            setIgnoreMAP(false);
-                                        }
-                                    }} label={'Always max MAP'} id={'checkbox_max_map' + id} />
-                                </div>
+                        }
+                        { classChoice === 'primarySpellcaster' &&
+                            <div>
                                 <div>
-                                    
-                                <CheckboxButtonInput value={currentPCState.ignoreMAP} setValue={(val:boolean) => {
-                                        setIgnoreMAP(val)
-                                        if (val) {
-                                            setStartAtMaxMAP(false);
+                                    <div className={'labelElement'}>
+                                        <p className={'labelHeader'}>Cantrip</p>   
+                                    </div>
+                                </div>
+                                <div className={'elementWrapper'}>
+                                    <div className={'elementContainer'}>
+                                        <div className={'oneThirdElement'} style={{width: 140}} >
+                                            <p className={'label'}>Spell</p>
+                                            <CantripChoice setCantripSpell={setCantripSpell} cantripSpell={cantripSpell} />
+                                        </div>
+                                        <div className={'twoFifthElement'}>
+                                            <p className={'label'}>Bonus to hit</p>  
+                                            <NumberInput min={-20} max={20} value={currentPCState.hitBonus} setValue={setHitBonus} /> 
+                                        </div>
+                                        <div className={'oneThirdElement'}>
+                                            <p className={'label'}>Bonus to damage</p>  
+                                            <NumberInput min={-20} max={20} value={currentPCState.dmgBonus} setValue={setDmgBonus} /> 
+                                        </div>
+                                    </div>
+                                    <div className={'elementContainer'}>
+                                        {cantripSpell !== undefined && cantripSpell.spellAttack &&
+                                            <div className={'oneThirdElement'}>
+                                                <p className={'label'}>Crit range</p>  
+                                                <NumberInput min={2} max={20} value={currentPCState.spellcastingCrit} setValue={setSpellcastingCrit} /> 
+                                            </div>
                                         }
-                                    }} label={'Ignore MAP'} id={'checkbox_ignore_map' + id} />
+                                        {cantripSpell !== undefined && cantripSpell.targets > 1 &&
+                                            <div className={'oneThirdElement'}>
+                                                <p className={'label'}>Target amount</p>  
+                                                <NumberInput min={1} max={20} value={currentPCState.spellCastingTargetAmount} setValue={setSpellCastingTargetAmount} /> 
+                                            </div>
+                                        }
+                                        {cantripSpell !== undefined && cantripSpell.standardEffect.splashDmg > 0 &&
+                                            <div className={'oneThirdElement'}>
+                                                <p className={'label'}>Splash amount</p>  
+                                                <NumberInput min={1} max={20} value={currentPCState.spellCastingSplashTargetAmount} setValue={setSpellCastingSplashTargetAmount} /> 
+                                            </div>
+                                        }
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        }
                     </div>
                 )}
             </Paper>
