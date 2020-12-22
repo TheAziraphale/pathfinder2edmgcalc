@@ -7,6 +7,23 @@
   pointer-events: none;
 }
 
+.addPCClassWrapper {
+  margin-bottom: 0px;
+  margin-left: 10px;
+  justify-content: center;
+  display: inline-flex;
+  width: calc(50% - 25px);
+  min-height: 100px;
+}
+
+.addPCClassButtonContainer {
+  height: 40px;
+  width: 40px;
+  align-self: center;
+  border-radius: 20px;
+  background-color: rgb(25, 180, 25);
+}
+
 .classWrapper {
   margin: auto;
   width: 880px;
@@ -16,8 +33,16 @@
 .dmgCalcRow {
   display: flex;
   justify-content: space-between;
-  flex-direction: 'row';
-  width: 820px;
+  flex-direction: row;
+  width: 880px;
+}
+
+.dmgCalcGroup {
+  display: flex;
+  margin: 10px;
+  width: 880px;
+  height:auto;
+  flex-wrap: wrap;
 }
 
 @media (prefers-reduced-motion: no-preference) {

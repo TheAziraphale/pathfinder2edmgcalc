@@ -32,13 +32,14 @@ import WeaponState, { Weapon, WeaponDices, WeaponRunes, WeaponTraits } from './W
 import CantripChoice, { Cantrip } from './CantripChoice';
 
 interface Props {
-    id: string;
+    id: number;
     color: string;
     setGraphData: (data:any[]) => void;
     acJson: any[];
     saveJson: any[];
     enemyAcMod?: string;
     enemySaveMod?: string;
+    removeMe?: (id:number) => void
 }
 
 interface Stats {
@@ -147,7 +148,6 @@ const PCClass = (props: Props) => {
         let fatalDice: string = customFatalDice !== undefined ? customFatalDice : '-';  
         let traits: string[] = undefined;  
         let type: string = 'Melee';
-
         
         if (classChoice === 'monk') {
             const monkJson = getClassJson(classChoice, classSpec);
@@ -488,7 +488,6 @@ const PCClass = (props: Props) => {
                     let attackSelection = attackSelections[attack - 1];
                     let weaponToAttackWith = attackSelections[attack - 1].hand === 'main' ? mainHand : offHand;
                     
-                    // console.log(weaponToAttackWith);
                     if (level >= 6 && classSpec === 'wolf' && wolfDrag) {
                         weaponToAttackWith = createBaseWeapon('12');
                     }
@@ -502,10 +501,10 @@ const PCClass = (props: Props) => {
                     const attackChances = getAttackChances(currentPCState, weaponToAttackWith, attackSelection, attack, level, parseInt(enemyAcMod) - flatFootedValue, acJson);
                     const lastAttack = attack === amountOfAttacks;
 
-
                     let thisAttackDmg = (attackChances.hitChance / 100) * getAvgDmg(currentPCState, weaponToAttackWith, false, level, lastAttack, attack);
                     thisAttackDmg += (attackChances.criticalHitChance / 100) * getAvgDmg(currentPCState, weaponToAttackWith, true, level, lastAttack, attack);
                     
+                    console.log(thisAttackDmg);
                     let reactionExtraDmg = 0;
                     if (attack === 1 && ((classChoice === 'champion' && retributiveStrike) || (classChoice === 'fighter' && attackOfOpportunity))) {
                         /* Symbolizes a free extra attack with reaction */
@@ -533,6 +532,7 @@ const PCClass = (props: Props) => {
                     totalAmountOfDmg += thisAttackDmg;
                 }
             }
+            console.log(totalAmountOfDmg);
             attackData.push(totalAmountOfDmg);
             attacksSummary.push(attackSummary);
             level++;
@@ -541,7 +541,7 @@ const PCClass = (props: Props) => {
         return [ 
             {
                 datasets: {
-                    label: (parseInt(id) + 1) +'# ' + (classSpec !== '-' ? Capitalize(classSpec) : '') + ' ' + Capitalize(classChoice),
+                    label: (id + 1) + '# ' + (classSpec !== '-' ? Capitalize(classSpec) : '') + ' ' + Capitalize(classChoice),
                     data: attackData,
                     fill: false,
                     borderColor: currentColor,
@@ -556,7 +556,7 @@ const PCClass = (props: Props) => {
     }
 
     return (
-        <div className={'pcWrapper'}>
+        <div className={'pcWrapper'} key={'pc_element_' + id}>
             <Paper className={'innerPCWrapper'}>
                 <div className={'labelElement'}>
                     <p className={'labelHeader'}>Class and specialization</p>   
@@ -654,8 +654,8 @@ const PCClass = (props: Props) => {
                                                 if(!currentPCState.applyPanache) {
                                                     setLastAttackWithFinisher(false);
                                                 }
-                                            }} label={'Panache'} id={'checkbox_panache' + id} />
-                                            {currentPCState.applyPanache && <CheckboxButtonInput value={currentPCState.lastAttackWithFinisher} setValue={setLastAttackWithFinisher} label={'Last attack - finisher'} id={'checkbox_finisher' + id} />} 
+                                            }} label={'Panache'} id={'checkbox_panache_' + id} />
+                                            {currentPCState.applyPanache && <CheckboxButtonInput value={currentPCState.lastAttackWithFinisher} setValue={setLastAttackWithFinisher} label={'Last attack - finisher'} id={'checkbox_finisher_' + id} />} 
                                         </div>
                                     </div>
                                 }
@@ -663,8 +663,8 @@ const PCClass = (props: Props) => {
                                     <div className={'halfElement'}>
                                         <p className={'label'}>Abilities</p>
                                         <div className={'buttonCheckboxWrapper'}>
-                                            <CheckboxButtonInput fixedWidth={80} value={currentPCState.applySneakDmg} setValue={setApplySneakDmg} label={'Sneak damage'} id={'checkbox_sneak_dmg' + id} />
-                                            <CheckboxButtonInput fixedWidth={88} value={currentPCState.canUseDexForDmg} setValue={setCanUseDexForDmg} label={'Dex for damage'} id={'checkbox_dex_for_dmg' + id} />
+                                            <CheckboxButtonInput fixedWidth={80} value={currentPCState.applySneakDmg} setValue={setApplySneakDmg} label={'Sneak damage'} id={'checkbox_sneak_dmg_' + id} />
+                                            <CheckboxButtonInput fixedWidth={88} value={currentPCState.canUseDexForDmg} setValue={setCanUseDexForDmg} label={'Dex for damage'} id={'checkbox_dex_for_dmg_' + id} />
                                         </div> 
                                     </div>
                                 )}
@@ -672,7 +672,7 @@ const PCClass = (props: Props) => {
                                     <div className={'quarterElement'}>
                                         <p className={'label'}>Abilities</p>
                                         <div className={'buttonCheckboxWrapper'}>
-                                            <CheckboxButtonInput value={currentPCState.deviseAStratagem} setValue={setDeviseAStratagem} label={'Devise a Stratagem'} id={'checkbox_devise_a_stratagem' + id} />
+                                            <CheckboxButtonInput value={currentPCState.deviseAStratagem} setValue={setDeviseAStratagem} label={'Devise a Stratagem'} id={'checkbox_devise_a_stratagem_' + id} />
                                         </div>  
                                     </div>
                                 }
@@ -680,7 +680,7 @@ const PCClass = (props: Props) => {
                                     <div className={'quarterElement'}>
                                         <p className={'label'}>Abilities</p>
                                         <div className={'buttonCheckboxWrapper'}>
-                                            <CheckboxButtonInput value={currentPCState.retributiveStrike} setValue={setRetributiveStrike} label={'Retributive Strike'} id={'checkbox_retributive_strike' + id} />
+                                            <CheckboxButtonInput value={currentPCState.retributiveStrike} setValue={setRetributiveStrike} label={'Retributive Strike'} id={'checkbox_retributive_strike_' + id} />
                                         </div>  
                                     </div>
                                 }
@@ -688,7 +688,7 @@ const PCClass = (props: Props) => {
                                     <div className={'quarterElement'}>
                                         <p className={'label'}>Abilities</p>
                                         <div className={'buttonCheckboxWrapper'}>
-                                            <CheckboxButtonInput value={currentPCState.attackOfOpportunity} setValue={setAttackOfOpportunity} label={'Attack of Opportunity'} id={'checkbox_attack_of_opportunity_fighter' + id} />
+                                            <CheckboxButtonInput value={currentPCState.attackOfOpportunity} setValue={setAttackOfOpportunity} label={'Attack of Opportunity'} id={'checkbox_attack_of_opportunity_fighter_' + id} />
                                         </div>  
                                     </div>
                                 }
@@ -696,7 +696,7 @@ const PCClass = (props: Props) => {
                                     <div className={'halfElement'}>
                                         <p className={'label'}>Abilities</p> 
                                         <div className={'buttonCheckboxWrapper'}>
-                                            <CheckboxButtonInput value={currentPCState.markedTarget} setValue={setMarkedTarget} label={"Hunter's Edge"} id={'checkbox_hunters_edge' + id} />
+                                            <CheckboxButtonInput value={currentPCState.markedTarget} setValue={setMarkedTarget} label={"Hunter's Edge"} id={'checkbox_hunters_edge_' + id} />
                                         </div>  
                                     </div>
                                 }
@@ -704,7 +704,7 @@ const PCClass = (props: Props) => {
                                     <div className={'quarterElement'}>
                                         <p className={'label'}>Abilities</p> 
                                         <div className={'buttonCheckboxWrapper'}>
-                                            <CheckboxButtonInput value={currentPCState.rage} setValue={setRage} label={"Raging"} id={'checkbox_rage' + id} />
+                                            <CheckboxButtonInput value={currentPCState.rage} setValue={setRage} label={"Raging"} id={'checkbox_rage_' + id} />
                                         </div>  
                                     </div>
                                 }
@@ -712,7 +712,7 @@ const PCClass = (props: Props) => {
                                     <div className={'quarterElement'}>
                                         <p className={'label'}>Abilities</p> 
                                         <div className={'buttonCheckboxWrapper'}>
-                                            <CheckboxButtonInput value={currentPCState.tigerSlash} setValue={setTigerSlash} label={"Tiger slash, 6th lvl"} id={'checkbox_tiger_slash' + id} />
+                                            <CheckboxButtonInput value={currentPCState.tigerSlash} setValue={setTigerSlash} label={"Tiger slash, 6th lvl"} id={'checkbox_tiger_slash_' + id} />
                                         </div>  
                                     </div>
                                 }
@@ -720,7 +720,7 @@ const PCClass = (props: Props) => {
                                     <div className={'quarterElement'}>
                                         <p className={'label'}>Abilities</p> 
                                         <div className={'buttonCheckboxWrapper'}>
-                                            <CheckboxButtonInput value={currentPCState.craneFlutter} setValue={setCraneFlutter} label={"Crane flutter, 6th lvl"} id={'checkbox_crane_flutter' + id} />
+                                            <CheckboxButtonInput value={currentPCState.craneFlutter} setValue={setCraneFlutter} label={"Crane flutter, 6th lvl"} id={'checkbox_crane_flutter_' + id} />
                                         </div>  
                                     </div>
                                 }
@@ -728,7 +728,7 @@ const PCClass = (props: Props) => {
                                     <div className={'quarterElement'}>
                                         <p className={'label'}>Abilities</p> 
                                         <div className={'buttonCheckboxWrapper'}>
-                                            <CheckboxButtonInput value={currentPCState.dragonRoar} setValue={setDragonRoar} label={"Dragon roar, 6th lvl"} id={'checkbox_dragon_roar' + id} />
+                                            <CheckboxButtonInput value={currentPCState.dragonRoar} setValue={setDragonRoar} label={"Dragon roar, 6th lvl"} id={'checkbox_dragon_roar_' + id} />
                                         </div>  
                                     </div>
                                 }
@@ -736,7 +736,7 @@ const PCClass = (props: Props) => {
                                     <div className={'quarterElement'}>
                                         <p className={'label'}>Abilities</p> 
                                         <div className={'buttonCheckboxWrapper'}>
-                                            <CheckboxButtonInput value={currentPCState.wolfDrag} setValue={setWolfDrag} label={"Wolf drag, 6th lvl"} id={'checkbox_wolf_drag' + id} />
+                                            <CheckboxButtonInput value={currentPCState.wolfDrag} setValue={setWolfDrag} label={"Wolf drag, 6th lvl"} id={'checkbox_wolf_drag_' + id} />
                                         </div>  
                                     </div>
                                 }
@@ -744,7 +744,7 @@ const PCClass = (props: Props) => {
                                     <div className={'quarterElement'} style={{marginRight: 5}}>
                                         <p className={'label'}>Abilities</p> 
                                         <div className={'buttonCheckboxWrapper'}>
-                                            <CheckboxButtonInput value={currentPCState.gorillaPound} setValue={setGorillaPound} label={"Gorilla pound, 6th lvl"} id={'checkbox_gorilla_pound' + id} />
+                                            <CheckboxButtonInput value={currentPCState.gorillaPound} setValue={setGorillaPound} label={"Gorilla pound, 6th lvl"} id={'checkbox_gorilla_pound_' + id} />
                                         </div>  
                                     </div>
                                 }
@@ -758,7 +758,7 @@ const PCClass = (props: Props) => {
                                     <div className={'quarterElement'}>
                                         <p className={'label'}>Abilities</p> 
                                         <div className={'buttonCheckboxWrapper'}>
-                                            <CheckboxButtonInput value={currentPCState.stumblingFeint} setValue={setTumblingFeint} label={"Sumbling feint, 6th lvl"} id={'checkbox_stumbling_feint' + id} />
+                                            <CheckboxButtonInput value={currentPCState.stumblingFeint} setValue={setTumblingFeint} label={"Sumbling feint, 6th lvl"} id={'checkbox_stumbling_feint_' + id} />
                                         </div>  
                                     </div>
                                 }
@@ -817,7 +817,7 @@ const PCClass = (props: Props) => {
                                                 if (val) {
                                                     setIgnoreMAP(false);
                                                 }
-                                            }} label={'Always max MAP'} id={'checkbox_max_map' + id} />
+                                            }} label={'Always max MAP'} id={'checkbox_max_map_' + id} />
                                         </div>
                                         <div>
                                             
@@ -826,7 +826,7 @@ const PCClass = (props: Props) => {
                                                 if (val) {
                                                     setStartAtMaxMAP(false);
                                                 }
-                                            }} label={'Ignore MAP'} id={'checkbox_ignore_map' + id} />
+                                            }} label={'Ignore MAP'} id={'checkbox_ignore_map_' + id} />
                                         </div>
                                     </div>
                                 </div>

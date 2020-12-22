@@ -1,8 +1,7 @@
 .pcWrapper {
-    margin: 20px;
-    margin-top: 10px;
-    margin-bottom: 0px;
-    width: 400px;
+    margin-left: 10px;
+    margin-bottom: 10px;
+    width: calc(50% - 25px);
 }
 
 .innerPCWrapper {
@@ -143,3 +142,75 @@
     padding: 3px;
     border-radius: 10px;
   }
+
+  .donateButtonContainer {
+      position: absolute;
+  }
+
+  .donateButtonPopup {
+    position: absolute;
+    width: 80px;
+    height: 30px;
+    border-radius: 20px;
+    top: 20px;
+    right: 20px;
+    background-color:#0079C1;
+    cursor: pointer;
+  }
+
+  .donateButtonText {
+    width: 80px;
+    height: 30px;
+    line-height: 30px;
+    margin: 0px;
+    text-align: center;
+    font-size: 16px;
+    color: white;
+    font-weight: 700;
+  }
+
+  .donateContainer {
+    position: absolute;
+    width: 250px;
+    background-color: white;
+    right: 0px;
+    border-color: darkgray;
+    border-width: 1px;
+    border-radius: 5px;
+    padding: 10px;
+    border-style: solid;
+  }
+
+  .donateAmountContainer {
+    margin-bottom: 10px;
+    display: flex;
+    flex-direction: row;
+  }
+
+  .donateAmountText {
+    margin: 0px; 
+    margin-bottom: 1px; 
+    margin-right: 5px;
+    font-size: 18px;
+  }
+  .donateAmountQuestionText {
+    line-height: 16px;
+    font-size: 16px;
+    margin: 0px; 
+    margin-bottom: 10px;
+  }
+
+  .currencyInput {
+      width: 70px;
+      height: 20px;
+      font-size: 16px;
+      margin-bottom: 12px;
+      border-width: 1px;
+      border-radius: 4px;
+  }
+
+  .currencyInput:focus {
+    outline: none !important;
+    border:1px solid #00A1E0;
+    box-shadow: 0 0 2px lightblue;
+}

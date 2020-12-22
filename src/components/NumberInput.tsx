@@ -19,7 +19,7 @@ const NumberInput = (props: Props) => {
                     <p className={'labelName'}>{label}</p>
                 </div>
             )}
-            <input className={'inputNumber'}  type={'number'} min={min} max={max} value={value} onChange={(event) => { 
+            <input className={'inputNumber'} type={'number'} min={min} max={max} value={value} onChange={(event) => { 
                 setValue(parseInt(event.target.value))
             }} />
         </div>

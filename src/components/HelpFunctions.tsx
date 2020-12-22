@@ -513,6 +513,7 @@ export const getSpellAttackChance = (currentPCState: PCState, level: number, ene
 
 export const getAttackChances = (currentPCState: PCState, weapon: Weapon, attackSelection: AttackSelection, attack: number, level:number, enemyAcMod: number, acJson: any[]) => {
     let hitAbilityBonus = getAbilityBonus(level, getHitStat(weapon.traits.finesse, currentPCState.stats.dexterity, currentPCState.stats.strength, weapon.type));
+
     if ((attack === 1 && currentPCState.classChoice === 'investigator') && currentPCState.deviseAStratagem) {
         hitAbilityBonus = getAbilityBonus(level, currentPCState.stats.intelligence);
     }

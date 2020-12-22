@@ -3,8 +3,13 @@ import Paper from '@material-ui/core/Paper';
 import './Components.css';
 import { Line } from "react-chartjs-2";
 
+export interface GraphElement {
+    id: number;
+    data: any;
+  }
+
 interface Props {
-    data?: any[];
+    graphElement: GraphElement[];
     enemyAcMod?: string;
     enemySaveMod?: string;
     acJson:any[];
@@ -12,14 +17,19 @@ interface Props {
 }
 
 const DMGGraph = (props: Props) => {
-    const { data, enemyAcMod, enemySaveMod, acJson, saveJson } = props;
+    const { graphElement, enemyAcMod, enemySaveMod, acJson, saveJson } = props;
 
+    console.log("graphElement", graphElement);
     const datasets = [];
     const attackssummary = [];
-    data.forEach((instance) => {
-        if (Object.keys(instance).length !== 0) { 
-            datasets.push(instance.datasets);
-            attackssummary.push(instance.attacksSummary);
+    graphElement.forEach((element) => {
+        if (Object.keys(element).length !== 0) { 
+            if (element.data !== undefined && Object.keys(element.data).length !== 0) {
+                console.log("instance", element.data[0]);
+    
+                datasets.push(element.data[0].datasets);
+                attackssummary.push(element.data[0].attacksSummary);
+            }
         }
     });
 
@@ -36,6 +46,7 @@ const DMGGraph = (props: Props) => {
         tooltips: {
             callbacks: {
                 title: function(tooltipItem, data) {
+                    console.log("1");
                     return (
                         data.datasets[tooltipItem[0].datasetIndex].label + " - Level " + data.labels[tooltipItem[0].index].toLocaleString("en-US", {
                             minimumIntegerDigits: 2,
@@ -44,12 +55,14 @@ const DMGGraph = (props: Props) => {
                     );
                 },
                 label: function(tooltipItems, data) {
+                    console.log("2");
                     return "Average total Damage: " +  data.datasets[tooltipItems.datasetIndex].data[tooltipItems.index].toFixed(1);
                 },
                 afterBody: function(tooltipItems, data) {
+                    console.log("3");
                     var multistring = ['----------------------------------------'];
                     data.attackssummary[tooltipItems[0].datasetIndex][tooltipItems[0].index].forEach((attack, index) => {
-                        // console.log(attack);
+                        console.log(attack);
                         
                         if (attack.spellDC === undefined) {
                             multistring.push('Attack '+ (index + 1) + ' - Total hit: ' + attack.totalHit.toFixed(0) +
@@ -76,6 +89,7 @@ const DMGGraph = (props: Props) => {
                 }
             },
             custom: function(tooltip) {
+                console.log("4");
                 tooltip.zindex = 1000;
               },
             xPadding: 20,
