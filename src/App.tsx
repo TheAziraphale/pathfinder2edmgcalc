@@ -17,7 +17,7 @@ const App = () => {
   const [graphDatas, setGraphDatas] = useState<GraphElement[]>([]);
   const [pcs, setPCs] = useState<PCElement[]>([{
     id: 0,
-    startColor: 'blue',
+    startColor: STARTING_COLOR_ARRAY[0],
   }]);
   const [enemyAcMod, setEnemyAcMod] = useState('0');
   const [enemySaveMod, setEnemySaveMod] = useState('0');
@@ -68,15 +68,17 @@ const App = () => {
             renderItem={renderPCClass}
             renderWhenEmpty={() => <div>List is empty!</div>}
         />
-        <div className={'addPCClassWrapper'}>
-            <div className={'addPCClassButtonContainer'}>
-              <Button style={{minHeight: 0, minWidth: 0, height: 40, width: 40,  borderRadius: 20, fontSize:40, padding: 0, margin: 0,
-                color: 'white', backgroundColor: 'rgb(25, 180, 25)'}} className={'addPCClassButton'} variant="contained" 
-                onClick={() => { createNewPC(currentHighestId) }}>
-                  {'+'}
-              </Button>
-            </div>
-        </div>
+        {pcs && pcs.length < 6 && (
+          <div className={'addPCClassWrapper'}>
+              <div className={'addPCClassButtonContainer'}>
+                <Button style={{minHeight: 0, minWidth: 0, height: 40, width: 40,  borderRadius: 20, fontSize:40, padding: 0, margin: 0,
+                  color: 'white', backgroundColor: 'rgb(25, 180, 25)'}} className={'addPCClassButton'} variant="contained" 
+                  onClick={() => { createNewPC(currentHighestId) }}>
+                    {'+'}
+                </Button>
+              </div>
+          </div>
+        )}
       </div>
     </div>
   );
