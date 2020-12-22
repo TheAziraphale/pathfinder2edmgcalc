@@ -1,15 +1,17 @@
 //import React from 'react';
+/*
 import { useState } from 'react';
 import { PayPalButton } from 'react-paypal-button-v2';
 import CurrencyInput from 'react-currency-input-field';
 
+
+const productionId = "ATrXcTp0UOYX284Nk3N7ujhUN3FsfmK6JDhSF9alhPqfbisNcxYVR5YkG6_CKdEBGBDr_GSSH6hH7Q0s";
+*/
 interface Props {
     onSuccess: () => void
 }
-
-const productionId = "ATrXcTp0UOYX284Nk3N7ujhUN3FsfmK6JDhSF9alhPqfbisNcxYVR5YkG6_CKdEBGBDr_GSSH6hH7Q0s";
-
 export const Donate = (props: Props) => {
+    /*
     const [amount, setAmount] = useState<string>('5');
     const onSuccess = (details, data) => {
             props.onSuccess();
@@ -60,6 +62,8 @@ export const Donate = (props: Props) => {
             />
         </div>
     );
+    */
+   return null;
 }
 
 export default Donate;

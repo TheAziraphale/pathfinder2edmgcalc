@@ -34,7 +34,7 @@ const App: React.FC = () => {
   }
 
   const updateHeadGraph = useCallback((newGraphElement: GraphElement) => {
-    let newArray = graphDatas.current.filter((element) => element.id !== newGraphElement.id);
+    const newArray = graphDatas.current.filter((element) => element.id !== newGraphElement.id);
     graphDatas.current = [...newArray, newGraphElement];
     forceUpdate({});
   }, [graphDatas])
