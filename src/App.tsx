@@ -1,5 +1,5 @@
 import { Button } from '@material-ui/core';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useState } from 'react';
 import './App.css';
 import DMGGraph, { GraphElement } from './components/DMGGraph';
 import EnemyACMod from './components/EnemyACAndSaveMod';
