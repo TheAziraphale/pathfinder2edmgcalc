@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Paper from '@material-ui/core/Paper';
 import './Components.css';
 import { Line } from "react-chartjs-2";
@@ -14,10 +14,25 @@ interface Props {
     enemySaveMod?: string;
     acJson:any[];
     saveJson:any[];
+    reset?: boolean;
 }
 
 const DMGGraph = (props: Props) => {
-    const { graphElement, enemyAcMod, enemySaveMod, acJson, saveJson } = props;
+    const { graphElement, enemyAcMod, enemySaveMod, acJson, saveJson, reset } = props;
+    const [resetLine, setResetLine] = useState<boolean>(false);
+
+    useEffect(() => {
+        if(reset) {
+            setResetLine(true);
+        }
+    },[reset])
+
+    useEffect(() => {
+        if(resetLine) {
+            setResetLine(false);
+        }
+    },[resetLine])
+
 
     const datasets = [];
     const attackssummary = [];
@@ -102,29 +117,38 @@ const DMGGraph = (props: Props) => {
          ]
     };
 
+    
+
     return (
-        <div className={'graphContainer'}>
+        <div style={{height: 400, width: 840, margin: 20, marginBottom: 0,
+        }} className={'graphContainer'}>
             <Paper>
-                <Line height={360} width={800} options={options} data={styledData} />
+                {!resetLine && <Line height={360} width={800} options={options} data={styledData} /> }
+                
                 <div>
-                    <p className={'acLabel'} key={'ac'}>{'AC:'}</p>
-                    <div className={'graphRowChildren'}>
+                    <p style={{position: 'absolute', fontSize: 12, marginLeft: 3, marginTop: 1, fontWeight: 700,}} className={'acLabel'} key={'ac'}>{'AC:'}</p>
+                    <div style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between', marginRight: 3,marginLeft: 26,
+    marginBottom: 0, height: 23,}} className={'graphRowChildren'}>
                         {acJson.map((ac, index) => {
                             if(index === 0 || index >= 21) {
                                 return '';
                             }
-                            return(<p className={'acText'} key={ac + '_' + index}>{ac + (enemyAcMod !== undefined ? parseInt(enemyAcMod) : 0)}</p>)
+                            return(<p style={{fontSize: 13, fontStyle: 'italic', marginTop: 0, width: 16 }} 
+                            className={'acText'} key={ac + '_' + index}>{ac + (enemyAcMod !== undefined ? parseInt(enemyAcMod) : 0)}</p>)
                         })}
                     </div>
                 </div>
                 <div>
-                    <p className={'saveLabel'} key={'saves'}>{'Save:'}</p>
-                    <div className={'graphRowChildren'} style={{width:'95%'}}>
+                    <p style={{position: 'absolute', fontSize: 8,marginLeft: 3, marginTop: 3, fontWeight: 700,
+                    }} className={'saveLabel'} key={'saves'}>{'Save:'}</p>
+                    <div style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between', marginRight: 3,marginLeft: 26,
+    marginBottom: 0, height: 23, width:'95%'}} className={'graphRowChildren'}>
                         {saveJson.map((saves, index) => {
                             if(index === 0 || index >= 21) {
                                 return '';
                             }
-                            return(<p className={'acText'} key={saves + '_' + index}>{'+' + (saves + (enemySaveMod !== undefined ? parseInt(enemySaveMod) : 0))}</p>)
+                            return(<p style={{fontSize: 13, fontStyle: 'italic', marginTop: 0, width: 16 }} 
+                            className={'acText'} key={saves + '_' + index}>{'+' + (saves + (enemySaveMod !== undefined ? parseInt(enemySaveMod) : 0))}</p>)
                         })}
                     </div>
                 </div>

@@ -5,6 +5,8 @@ import DMGGraph, { GraphElement } from './components/DMGGraph';
 import EnemyACMod from './components/EnemyACAndSaveMod';
 import PCClass from './components/PCClass';
 import FlatList from 'flatlist-react';
+import Modal from './components/Modal';
+import PopoutIcon from './data/PopoutIcon.png';
 
 const STARTING_COLOR_ARRAY = ['blue', 'red', 'green', 'yellow', 'purple', 'brown', 'teal', 'pink', 'orange']
 
@@ -13,7 +15,7 @@ interface PCElement {
   startColor: string;
 }
 
-const App = () => {
+const App: React.FC = () => {
   const graphDatas = useRef<GraphElement[]>([])
   const [, forceUpdate] = React.useState({});
   const [pcs, setPCs] = useState<PCElement[]>([{
@@ -25,6 +27,7 @@ const App = () => {
   const [acJson, setACJson] = useState<any[]>([]);
   const [saveJson, setSaveJson] = useState<any[]>([]);
   const [currentHighestId, setCurrentHighestId] = useState<number>(1);
+  const [graphIsInPortal, setGraphIsInPortal] = useState<boolean>(false);
 
   const removePC = (id:number) => {
     setPCs(pcs.filter((pcElement:PCElement) => pcElement.id !== id));
@@ -60,7 +63,20 @@ const App = () => {
 
   return (
     <div className={'classWrapper'}>
-      <DMGGraph graphElement={graphDatas.current} enemyAcMod={enemyAcMod} acJson={acJson} enemySaveMod={enemySaveMod} saveJson={saveJson} />
+      <Modal graphIsInPortal={graphIsInPortal} onClose={() => {setGraphIsInPortal(false)}}
+      children={
+        <div style={{ margin: 'auto', width: 880, marginBottom: 30}} className={'classWrapper'}>
+          <DMGGraph reset={graphIsInPortal} graphElement={graphDatas.current} enemyAcMod={enemyAcMod} acJson={acJson} enemySaveMod={enemySaveMod} saveJson={saveJson} />
+          </div>
+      }
+        />
+      { !graphIsInPortal && <DMGGraph graphElement={graphDatas.current} enemyAcMod={enemyAcMod} acJson={acJson} enemySaveMod={enemySaveMod} saveJson={saveJson} />}
+      <div className={'portalButton'}>
+        <Button onClick={() => {setGraphIsInPortal(!graphIsInPortal)}}>
+          <img className={'popoutImage'} src={PopoutIcon} alt={''} />
+          { /*graphIsInPortal ? 'Close popup window' : 'Pop out graph' */}
+        </Button>
+      </div>
       <EnemyACMod min={-20} max={20} acMod={enemyAcMod} setACMod={setEnemyAcMod} setACJson={setACJson} saveMod={enemySaveMod} setSaveMod={setEnemySaveMod} setSaveJson={setSaveJson} />
       <div key={'group_pc_elements2'} className={'dmgCalcGroup'}>
         <FlatList 

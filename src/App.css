@@ -9,6 +9,7 @@
   display: inline-flex;
   width: calc(50% - 25px);
   min-height: 100px;
+  max-height: 110px;
 }
 
 .addPCClassButtonContainer {
@@ -31,4 +32,22 @@
   width: 880px;
   height:auto;
   flex-wrap: wrap;
+}
+
+.portalButton {
+  position: absolute;
+  height: 20px;
+  width: 20px;
+  margin: 0px;
+  padding: 0px;
+  top: 10px;
+  margin-left: -15px;
+}
+.portalButton .MuiButton-root {
+  min-width: 0px;
+}
+
+.popoutImage {
+  width: 20px;
+  height: 20px;
 }
