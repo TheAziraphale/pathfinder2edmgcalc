@@ -311,6 +311,7 @@ export const getAvgSpellDmg = (currentPCState: PCState, cantrip: Cantrip, crit:b
 
     let splashBonusDmg = bestEffect.splashDmg * splashTargets;
 
+    bonusDmg += currentPCState.dmgBonus;
 
     if (crit) {
         let dmg = ((bestEffect.diceSize/2 + 0.5) * bestEffect.diceAmount + bonusDmg) * 2;

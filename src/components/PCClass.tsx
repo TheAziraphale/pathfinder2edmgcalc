@@ -796,11 +796,11 @@ const PCClass = (props: Props) => {
                                             <NumberInput min={tigerSlash ? 2 : 1} max={10} value={currentPCState.amountOfAttacks} setValue={setAmountOfAttacks} /> 
                                         </div>
                                         <div className={'twoFifthElement'}>
-                                            <p className={'label'}>Bonus to hit</p>  
+                                            <p className={'label'}>Buffs to hit</p>  
                                             <NumberInput min={-20} max={20} value={currentPCState.hitBonus} setValue={setHitBonus} /> 
                                         </div>
                                         <div className={'oneThirdElement'}>
-                                            <p className={'label'}>Bonus to damage</p>  
+                                            <p className={'label'}>Buffs to damage</p>  
                                             <NumberInput min={-20} max={20} value={currentPCState.dmgBonus} setValue={setDmgBonus} /> 
                                         </div>
                                     </div>
@@ -844,11 +844,11 @@ const PCClass = (props: Props) => {
                                             <CantripChoice setCantripSpell={setCantripSpell} cantripSpell={cantripSpell} />
                                         </div>
                                         <div className={'twoFifthElement'}>
-                                            <p className={'label'}>Bonus to hit</p>  
+                                            <p className={'label'}>Buffs to hit</p>  
                                             <NumberInput min={-20} max={20} value={currentPCState.hitBonus} setValue={setHitBonus} /> 
                                         </div>
                                         <div className={'oneThirdElement'}>
-                                            <p className={'label'}>Bonus to damage</p>  
+                                            <p className={'label'}>Buffs to damage</p>  
                                             <NumberInput min={-20} max={20} value={currentPCState.dmgBonus} setValue={setDmgBonus} /> 
                                         </div>
                                     </div>
