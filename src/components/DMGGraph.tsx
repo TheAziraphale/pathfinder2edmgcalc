@@ -56,8 +56,6 @@ const DMGGraph = (props: Props) => {
                 afterBody: function(tooltipItems, data) {
                     var multistring = ['----------------------------------------'];
                     data.attackssummary[tooltipItems[0].datasetIndex][tooltipItems[0].index].forEach((attack, index) => {
-                        console.log(attack);
-                        
                         if (attack.spellDC === undefined) {
                             multistring.push('Attack '+ (index + 1) + ' - Total hit: ' + attack.totalHit.toFixed(0) +
                             ' - Bonus dmg: ' + attack.totalDmg.toFixed(1) + ' - Avg dmg: ' + attack.avgDmgThisAttack.toFixed(1));
@@ -83,7 +81,6 @@ const DMGGraph = (props: Props) => {
                 }
             },
             custom: function(tooltip) {
-                console.log("4");
                 tooltip.zindex = 1000;
               },
             xPadding: 20,
