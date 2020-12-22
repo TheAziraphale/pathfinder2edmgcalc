@@ -1,5 +1,5 @@
 import { Button } from '@material-ui/core';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import './App.css';
 import DMGGraph, { GraphElement } from './components/DMGGraph';
 import EnemyACMod from './components/EnemyACAndSaveMod';
@@ -14,13 +14,8 @@ interface PCElement {
 }
 
 const App = () => {
-  const [graphDatas, setGraphDatas] = useState<GraphElement[]>([]);
-  const [graphData0, setGraphData0] = useState<GraphElement>({id: 0, data: {}});
-  const [graphData1, setGraphData1] = useState<GraphElement>({id: 1, data: {}});
-  const [graphData2, setGraphData2] = useState<GraphElement>({id: 2, data: {}});
-  const [graphData3, setGraphData3] = useState<GraphElement>({id: 3, data: {}});
-  const [graphData4, setGraphData4] = useState<GraphElement>({id: 4, data: {}});
-  const [graphData5, setGraphData5] = useState<GraphElement>({id: 5, data: {}});
+  const graphDatas = useRef<GraphElement[]>([])
+  const [, forceUpdate] = React.useState({});
   const [pcs, setPCs] = useState<PCElement[]>([{
     id: 0,
     startColor: STARTING_COLOR_ARRAY[0],
@@ -35,41 +30,20 @@ const App = () => {
     setPCs(pcs.filter((pcElement:PCElement) => pcElement.id !== id));
   }
 
-  const setNewGraph = (data:any, id:number) => { 
-    const newData = {id:id, data: data};
-    switch (id) {
-      case 0:
-        setGraphData0(newData);
-        break;
-      case 1:
-        setGraphData1(newData);
-        break;
-      case 2:
-        setGraphData2(newData);
-        break;
-      case 3:
-        setGraphData3(newData);
-        break;
-      case 4:
-        setGraphData4(newData);
-        break;
-      case 5:
-        setGraphData5(newData);
-        break;
-    }
-  }
-
-  useEffect(() => {
-    setGraphDatas([graphData0, graphData1, graphData2, graphData3, graphData4, graphData5])
-  }, [graphData0, graphData1, graphData2, graphData3, graphData4, graphData5]);
+  const updateHeadGraph = useCallback((newGraphElement: GraphElement) => {
+    let newArray = graphDatas.current.filter((element) => element.id !== newGraphElement.id);
+    graphDatas.current = [...newArray, newGraphElement];
+    forceUpdate({});
+  }, [graphDatas])
 
   const renderPCClass = (person, idx) => {
     return <PCClass
-      key={person.id}
+      key={person.id + '_' + idx}
       id={person.id} 
       color={person.startColor} 
       setGraphData={(data:any) => {
-        setNewGraph(data, person.id)}} 
+        updateHeadGraph({id: person.id, data: data});
+      }}
       enemyAcMod={enemyAcMod}
       enemySaveMod={enemySaveMod}
       acJson={acJson}
@@ -86,7 +60,7 @@ const App = () => {
 
   return (
     <div className={'classWrapper'}>
-      <DMGGraph graphElement={graphDatas} enemyAcMod={enemyAcMod} acJson={acJson} enemySaveMod={enemySaveMod} saveJson={saveJson} />
+      <DMGGraph graphElement={graphDatas.current} enemyAcMod={enemyAcMod} acJson={acJson} enemySaveMod={enemySaveMod} saveJson={saveJson} />
       <EnemyACMod min={-20} max={20} acMod={enemyAcMod} setACMod={setEnemyAcMod} setACJson={setACJson} saveMod={enemySaveMod} setSaveMod={setEnemySaveMod} setSaveJson={setSaveJson} />
       <div key={'group_pc_elements2'} className={'dmgCalcGroup'}>
         <FlatList 

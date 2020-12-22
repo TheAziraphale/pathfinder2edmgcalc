@@ -86,6 +86,17 @@ const WeaponState = (props: Props) => {
             setThirdPropRune(weapon.runes.thirdPropRune);
         }
     }, [weapon])
+    useEffect(() => {
+        if (weapon.type === 'Ranged') {
+            setAgile(false);
+            setBackstabber(false);
+            setFinesse(false);
+            setForceful(false);
+            setTwin(false);
+        } else {
+            setRangedDmgBonus('-');
+        }
+    }, [weapon.type])
 
     useEffect(() => {
         const weaponDices: WeaponDices = {
