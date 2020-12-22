@@ -67,9 +67,8 @@ const App: React.FC = () => {
       children={
         <div style={{ margin: 'auto', width: 880, marginBottom: 30}} className={'classWrapper'}>
           <DMGGraph reset={graphIsInPortal} graphElement={graphDatas.current} enemyAcMod={enemyAcMod} acJson={acJson} enemySaveMod={enemySaveMod} saveJson={saveJson} />
-          </div>
-      }
-        />
+        </div>
+      } />
       { !graphIsInPortal && <DMGGraph graphElement={graphDatas.current} enemyAcMod={enemyAcMod} acJson={acJson} enemySaveMod={enemySaveMod} saveJson={saveJson} />}
       <div className={'portalButton'}>
         <Button onClick={() => {setGraphIsInPortal(!graphIsInPortal)}}>
