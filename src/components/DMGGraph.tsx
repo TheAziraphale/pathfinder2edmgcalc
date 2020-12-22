@@ -19,14 +19,11 @@ interface Props {
 const DMGGraph = (props: Props) => {
     const { graphElement, enemyAcMod, enemySaveMod, acJson, saveJson } = props;
 
-    console.log("graphElement", graphElement);
     const datasets = [];
     const attackssummary = [];
     graphElement.forEach((element) => {
         if (Object.keys(element).length !== 0) { 
             if (element.data !== undefined && Object.keys(element.data).length !== 0) {
-                console.log("instance", element.data[0]);
-    
                 datasets.push(element.data[0].datasets);
                 attackssummary.push(element.data[0].attacksSummary);
             }
@@ -46,7 +43,6 @@ const DMGGraph = (props: Props) => {
         tooltips: {
             callbacks: {
                 title: function(tooltipItem, data) {
-                    console.log("1");
                     return (
                         data.datasets[tooltipItem[0].datasetIndex].label + " - Level " + data.labels[tooltipItem[0].index].toLocaleString("en-US", {
                             minimumIntegerDigits: 2,
@@ -55,11 +51,9 @@ const DMGGraph = (props: Props) => {
                     );
                 },
                 label: function(tooltipItems, data) {
-                    console.log("2");
                     return "Average total Damage: " +  data.datasets[tooltipItems.datasetIndex].data[tooltipItems.index].toFixed(1);
                 },
                 afterBody: function(tooltipItems, data) {
-                    console.log("3");
                     var multistring = ['----------------------------------------'];
                     data.attackssummary[tooltipItems[0].datasetIndex][tooltipItems[0].index].forEach((attack, index) => {
                         console.log(attack);

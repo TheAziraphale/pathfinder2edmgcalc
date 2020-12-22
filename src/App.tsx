@@ -1,5 +1,5 @@
 import { Button } from '@material-ui/core';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import './App.css';
 import DMGGraph, { GraphElement } from './components/DMGGraph';
 import EnemyACMod from './components/EnemyACAndSaveMod';
@@ -15,6 +15,12 @@ interface PCElement {
 
 const App = () => {
   const [graphDatas, setGraphDatas] = useState<GraphElement[]>([]);
+  const [graphData0, setGraphData0] = useState<GraphElement>({id: 0, data: {}});
+  const [graphData1, setGraphData1] = useState<GraphElement>({id: 1, data: {}});
+  const [graphData2, setGraphData2] = useState<GraphElement>({id: 2, data: {}});
+  const [graphData3, setGraphData3] = useState<GraphElement>({id: 3, data: {}});
+  const [graphData4, setGraphData4] = useState<GraphElement>({id: 4, data: {}});
+  const [graphData5, setGraphData5] = useState<GraphElement>({id: 5, data: {}});
   const [pcs, setPCs] = useState<PCElement[]>([{
     id: 0,
     startColor: STARTING_COLOR_ARRAY[0],
@@ -30,11 +36,32 @@ const App = () => {
   }
 
   const setNewGraph = (data:any, id:number) => { 
-    let newArray:GraphElement[] = graphDatas.filter((graphData:GraphElement) => graphData.id !== id);
-    console.log(id, data);
-    newArray.push({id, data});
-    setGraphDatas(newArray);
-   }
+    const newData = {id:id, data: data};
+    switch (id) {
+      case 0:
+        setGraphData0(newData);
+        break;
+      case 1:
+        setGraphData1(newData);
+        break;
+      case 2:
+        setGraphData2(newData);
+        break;
+      case 3:
+        setGraphData3(newData);
+        break;
+      case 4:
+        setGraphData4(newData);
+        break;
+      case 5:
+        setGraphData5(newData);
+        break;
+    }
+  }
+
+  useEffect(() => {
+    setGraphDatas([graphData0, graphData1, graphData2, graphData3, graphData4, graphData5])
+  }, [graphData0, graphData1, graphData2, graphData3, graphData4, graphData5]);
 
   const renderPCClass = (person, idx) => {
     return <PCClass
@@ -42,7 +69,6 @@ const App = () => {
       id={person.id} 
       color={person.startColor} 
       setGraphData={(data:any) => {
-        console.log("here");
         setNewGraph(data, person.id)}} 
       enemyAcMod={enemyAcMod}
       enemySaveMod={enemySaveMod}

@@ -503,8 +503,7 @@ const PCClass = (props: Props) => {
 
                     let thisAttackDmg = (attackChances.hitChance / 100) * getAvgDmg(currentPCState, weaponToAttackWith, false, level, lastAttack, attack);
                     thisAttackDmg += (attackChances.criticalHitChance / 100) * getAvgDmg(currentPCState, weaponToAttackWith, true, level, lastAttack, attack);
-                    
-                    console.log(thisAttackDmg);
+
                     let reactionExtraDmg = 0;
                     if (attack === 1 && ((classChoice === 'champion' && retributiveStrike) || (classChoice === 'fighter' && attackOfOpportunity))) {
                         /* Symbolizes a free extra attack with reaction */
@@ -532,7 +531,6 @@ const PCClass = (props: Props) => {
                     totalAmountOfDmg += thisAttackDmg;
                 }
             }
-            console.log(totalAmountOfDmg);
             attackData.push(totalAmountOfDmg);
             attacksSummary.push(attackSummary);
             level++;
